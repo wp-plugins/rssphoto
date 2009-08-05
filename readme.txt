@@ -4,7 +4,7 @@ Donate link: http://www.spencerkellis.net/
 Tags: RSS, Atom, photoblog, photo, widget
 Requires at least: 2.8
 Tested up to: 2.8.3
-Stable tag: N/A
+Stable tag: 0.1
 
 A simple widget to display photos from an RSS or Atom feed.
 
