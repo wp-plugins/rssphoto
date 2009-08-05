@@ -1,11 +1,11 @@
 <?php
 /*
  * Plugin Name: RSSPhoto
- * Version: 1.0
- * Plugin URI: http://photography.spencerkellis.net
+ * Version: 0.1
+ * Plugin URI: http://blog.spencerkellis.net/projects/rssphoto
  * Description: Display photos from an RSS or Atom feed
  * Author: Spencer Kellis
- * Author URI: http://www.spencerkellis.net
+ * Author URI: http://blog.spencerkellis.net
  */
 
 class RSSPhotoWidget extends WP_Widget
