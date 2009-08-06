@@ -1,6 +1,5 @@
 === RSSPhoto ===
 Contributor: spencerkellis
-Donate link: http://www.spencerkellis.net/
 Tags: RSS, Atom, photoblog, photo, widget
 Requires at least: 2.8
 Tested up to: 2.8.3
@@ -43,10 +42,20 @@ After your widget appears in the sidebar, go to the 'Widgets' section under the 
 the settings for the widget (click the down arrow in the widget titlebar and the form will appear).  Modify the fields as 
 needed and click save.
 
+= I'm getting an error about the SimplePie class not being found.  What's wrong? =
+
+Here's what the error might look like:
+
+Fatal error: Class .SimplePie. not found in /home/username/public_html/wp-content/plugins/rssphoto/rssphoto.php on line 40
+
+If you receive this error, the most likely problem is that the SimplePie Core plugin is not installed or activated.  Here's
+a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin").
+
 == Screenshots ==
 
-   1. http://blog.spencerkellis.net/wp-content/uploads/2009/08/screen1.jpg
-   2. http://blog.spencerkellis.net/wp-content/uploads/2009/08/screen2.jpg
+1.  What the plugin looks like in my [Sidebar](http://blog.spencerkellis.net "RSSPhoto loaded in my sidebar").
+2.  The plugin settings in WP Admin -> Appearances -> Widgets.
+
 
 == Changelog ==
 
