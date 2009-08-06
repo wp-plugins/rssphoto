@@ -19,20 +19,26 @@ directory in /wp-content/cache, writable by the server, to store thumbnails in.
 
 Here are the basic installation instructions:
 
-   1. If it doesn't already exist, create the directory `/wp-content/cache` and give it permissions of 755
-   2. Upload rssphoto.php to the `/wp-content/plugins/` directory
-   3. Activate the plugin through the 'Plugins' menu in Wordpress
-   4. Drag the widget to the sidebar in the 'Widgets' section of the 'Appearance' menu in Wordpress
-   5. Configure the widget by specifying title, url, max dimensions, and image selection.
-         1. Title: text that appears over the image in the sidebar
-         2. URL: address of the RSS or Atom feed
-         3. Max dimensions: the size in pixels of the largest side of the thumbnail
+   1. Install the SimplePie Core plugin if it's not already installed ([Link](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin")).
+   2. If it doesn't already exist, create the directory `/wp-content/cache` and give it permissions of 755
+   3. Upload rssphoto.php to the `/wp-content/plugins/` directory
+   4. Activate the plugin through the 'Plugins' menu in Wordpress
+   5. Drag the widget to the sidebar in the 'Widgets' section of the 'Appearance' menu in Wordpress
+   6. Configure the widget by specifying title, url, max dimensions, and image selection.
 
 Probably the easiest way to accomplish step 1 is through an FTP program.  If you're interested, here's how to do it on the command line:
 
    1. cd {blog-dir}/wp-content
    2. mkdir cache
    3. chmod 755 cache
+
+Here's a quick description of the settings:
+
+   1. Title: text that appears over the image in the sidebar
+   2. URL: address of the RSS or Atom feed
+   3. Max dimensions: the size in pixels of the largest side of the thumbnail
+   4. Image selection: you can choose to have the script randomly select images or just display the first image in the most recent feed entry.
+
 
 == Frequently Asked Questions ==
 
