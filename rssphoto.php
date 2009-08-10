@@ -31,7 +31,7 @@ class RSSPhotoWidget extends WP_Widget
     extract($args);
 
     // defaults
-    $title = apply_filters('widget_title', empty($instance['title']) ? '&nbsp;' : $instance['title']);
+    $title = apply_filters('widget_title', empty($instance['rssphoto_title']) ? '&nbsp;' : $instance['rssphoto_title']);
     $url = empty($instance['rssphoto_url']) ? 'http://photography.spencerkellis.net/atom.php' : $instance['rssphoto_url'];
     $max = empty($instance['rssphoto_max']) ? 150 : $instance['rssphoto_max'];
     $sel = empty($instance['rssphoto_sel']) ? 'Random' : $instance['rssphoto_sel'];
@@ -220,7 +220,7 @@ class RSSPhotoWidget extends WP_Widget
     //Display form
     echo '<div style="text-align:right;"><label for="' . $this->get_field_name('rssphoto_title') . '">' . __('Title:') . '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_title') . '" name="' . $this->get_field_name('rssphoto_title') . '" type="text" value="' . $title . '" /></label></div>';
     echo '<div style="text-align:right;"><label for="' . $this->get_field_name('rssphoto_url')   . '">' . __('URL:')   . '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_url')   . '" name="' . $this->get_field_name('rssphoto_url')   . '" type="text" value="' . $url   . '" /></label></div>';
-    echo '<div style="text-align:right;"><label for="' . $this->get_field_name('rssphoto_max')   . '">' . __('URL:')   . '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_max')   . '" name="' . $this->get_field_name('rssphoto_max')   . '" type="text" value="' . $max   . '" /></label></div>';
+    echo '<div style="text-align:right;"><label for="' . $this->get_field_name('rssphoto_max')   . '">' . __('Max Dimension:')   . '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_max')   . '" name="' . $this->get_field_name('rssphoto_max')   . '" type="text" value="' . $max   . '" /></label></div>';
     echo '<div style="text-align:right; float:left; width:150px;">' . __('Image Selection:') . '</div>';
     echo '<div style="text-align:left; float:left; width:350px; padding-left:5px;">';
     echo '<label for="' . $this->get_field_name('rssphoto_sel_random')     . '"><input ' . (($sel=='Random')      ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_sel_random')     . '" name="' . $this->get_field_name('rssphoto_sel') . '" value="Random">' . __('Random') . '</label><br>';

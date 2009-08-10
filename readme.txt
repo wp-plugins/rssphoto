@@ -3,7 +3,7 @@ Contributor: spencerkellis
 Tags: RSS, Atom, photoblog, photo, widget
 Requires at least: 2.8
 Tested up to: 2.8.3
-Stable tag: 0.1
+Stable tag: 0.1.2
 
 A simple widget to display photos from an RSS or Atom feed.
 
