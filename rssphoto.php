@@ -210,7 +210,7 @@ class RSSPhotoWidget extends WP_Widget
   function form($instance)
   {
     //Defaults
-    $instance = wp_parse_args( (array) $instance, array('rssphoto_title'=>'RSSPhoto','rssphoto_url'=>'http://photography.spencerkellis.net/atom.php','rssphoto_max'=>150,'rssphoto_sel','Random') );
+    $instance = wp_parse_args( (array) $instance, array('rssphoto_title'=>'RSSPhoto','rssphoto_url'=>'http://photography.spencerkellis.net/atom.php','rssphoto_max'=>150,'rssphoto_sel'=>'Random') );
 
     $title = htmlspecialchars($instance['rssphoto_title']);
     $url = htmlspecialchars($instance['rssphoto_url']);
