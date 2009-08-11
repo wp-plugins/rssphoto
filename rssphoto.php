@@ -1,7 +1,7 @@
 <?php
 /*
  * Plugin Name: RSSPhoto
- * Version: 0.1
+ * Version: 0.2
  * Plugin URI: http://blog.spencerkellis.net/projects/rssphoto
  * Description: Display photos from an RSS or Atom feed
  * Author: Spencer Kellis
