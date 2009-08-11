@@ -3,7 +3,7 @@ Contributor: spencerkellis
 Tags: RSS, Atom, photoblog, photo, widget
 Requires at least: 2.8
 Tested up to: 2.8.3
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 
 A simple widget to display photos from an RSS or Atom feed.
 
@@ -65,11 +65,14 @@ a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simple
 
 == Changelog ==
 
-  v0.1
-    * Original version
-    * Specify widget title
-    * Accepts any RSS or Atom feed URL
-    * Customize thumbnail size
-    * Select random or most recent image selection method
-    * jQuery image sliding effects with graceful degradation to plain Javascript
+v0.1
 
+* Original version
+* Specify widget title
+* Accepts any RSS or Atom feed URL
+* Customize thumbnail size
+* Select random or most recent image selection method
+* jQuery image sliding effects with graceful degradation to plain Javascript
+
+v0.1.1
+* Fixed an issue where the Max dimensions field had the wrong label
