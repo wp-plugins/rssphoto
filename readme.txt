@@ -66,15 +66,22 @@ a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simple
 == Changelog ==
 
 v0.2
+
 * Rolled up all other bug fixes from 0.1.* plus fixed a bug where there was no default value for the Image Selection field.
 
+
 v0.1.2
+
 * Fixed a bug where the title may not have been saved properly
 
+
 v0.1.1
+
 * Fixed an issue where the Max dimensions field had the wrong label
 
+
 v0.1
+
 * Original version
 * Specify widget title
 * Accepts any RSS or Atom feed URL
