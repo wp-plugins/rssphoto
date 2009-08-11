@@ -65,11 +65,18 @@ a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simple
 
 == Changelog ==
 
-  v0.1
-    * Original version
-    * Specify widget title
-    * Accepts any RSS or Atom feed URL
-    * Customize thumbnail size
-    * Select random or most recent image selection method
-    * jQuery image sliding effects with graceful degradation to plain Javascript
+v0.1
+
+* Original version
+* Specify widget title
+* Accepts any RSS or Atom feed URL
+* Customize thumbnail size
+* Select random or most recent image selection method
+* jQuery image sliding effects with graceful degradation to plain Javascript
+
+v0.1.1
+* Fixed an issue where the Max dimensions field had the wrong label
+
+v0.1.2
+* Fixed a bug where the title may not have been saved properly
 
