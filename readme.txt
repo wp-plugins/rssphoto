@@ -1,9 +1,10 @@
 === RSSPhoto ===
 Contributor: spencerkellis
+Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, widget
 Requires at least: 2.8
 Tested up to: 2.8.3
-Stable tag: 0.2
+Stable tag: 0.3
 
 A simple widget to display photos from an RSS or Atom feed.
 
@@ -64,6 +65,14 @@ a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simple
 
 
 == Changelog ==
+
+v0.3
+
+* Allow multiple RSSPhoto widgets to be present simultaneously
+* Selection of fixed width, height, or max dimension for thumbnails
+* Selection of pulling images from Content tags or Description tags from feeds
+* Fixed a bug where changing the thumbnail size wouldn't be reflected due to cached thumbnails with the same filename
+
 
 v0.2
 
