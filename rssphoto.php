@@ -60,7 +60,7 @@ class RSSPhotoWidget extends WP_Widget
     $img_sel = empty($instance['rssphoto_img_sel']) ? 'First' : $instance['rssphoto_img_sel'];
     $item_sel = empty($instance['rssphoto_item_sel']) ? 'Random' : $instance['rssphoto_item_sel'];
     $src = empty($instance['rssphoto_src']) ? 'Content' : $instance['rssphoto_src'];
-    $show_title = empty($instance['rssphoto_show_title']) ? 0 : $instance['rssphoto_show_title'];
+    $show_title = 0;//empty($instance['rssphoto_show_title']) ? 0 : $instance['rssphoto_show_title'];
 
     // initialize SimplePie object
     $feed = new SimplePie();
@@ -70,6 +70,13 @@ class RSSPhotoWidget extends WP_Widget
 
     if($feed->get_item_quantity() > 0)
     {
+      # Before the widget
+      echo $before_widget;
+      
+      # The title
+      if ( $title )
+        echo $before_title . $title . $after_title;
+
       // choose random feed item
       switch($item_sel)
       {
@@ -178,13 +185,6 @@ class RSSPhotoWidget extends WP_Widget
               }
             }
           }
-        
-          # Before the widget
-          echo $before_widget;
-          
-          # The title
-          if ( $title )
-          echo $before_title . $title . $after_title;
           
           ?>
           <div id="rssphoto_<?php echo $widget_id; ?>_imageDiv">
