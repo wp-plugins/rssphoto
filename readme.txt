@@ -3,7 +3,7 @@ Contributor: spencerkellis
 Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, widget
 Requires at least: 2.8
-Tested up to: 2.8.3
+Tested up to: 2.8.4
 Stable tag: 0.3
 
 A simple widget to display photos from an RSS or Atom feed.
@@ -15,6 +15,7 @@ images load with an animated slide down (if jQuery is available).
 
 RSSPhoto requires the SimplePie Core Wordpress plugin to parse RSS and Atom feeds.  It also requires a cache 
 directory in /wp-content/cache, writable by the server, to store thumbnails in.
+
 
 == Installation ==
 
@@ -35,10 +36,12 @@ Probably the easiest way to accomplish step 1 is through an FTP program.  If you
 
 Here's a quick description of the settings:
 
-   1. Title: text that appears over the image in the sidebar
-   2. URL: address of the RSS or Atom feed
-   3. Max dimensions: the size in pixels of the largest side of the thumbnail
-   4. Image selection: you can choose to have the script randomly select images or just display the first image in the most recent feed entry.
+   1. Title: text that appears over the image in the sidebar.
+   2. URL: address of the RSS or Atom feed.
+   3. Fixed dimension: select whether the width, height, or longest side should be fixed.
+   4. Dimension size: size in pixels of the width, height, or longest side (previously selected).
+   5. Image selection: you can choose to have the script randomly select images or just display the first image in the most recent feed entry.
+   6. Pull images from: some feeds have thumbnail previews in the item description rather than the item content.
 
 
 == Frequently Asked Questions ==
@@ -57,6 +60,12 @@ Fatal error: Class .SimplePie. not found in /home/username/public_html/wp-conten
 
 If you receive this error, the most likely problem is that the SimplePie Core plugin is not installed or activated.  Here's
 a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin").
+
+= Why won't any images load from my feed, or why do strange images load? =
+
+Some feeds have thumbnails in a `description` tag instead of the `content` tag.  In the Widget settings, change "Pull image from" to 
+Description and see if it makes a difference.
+
 
 == Screenshots ==
 
