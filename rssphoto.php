@@ -221,9 +221,6 @@ class RSSPhotoWidget extends WP_Widget
           }
           </script>
           <?php
-          
-          # After the widget
-          echo $after_widget;
         }
       }
       else
@@ -239,6 +236,9 @@ class RSSPhotoWidget extends WP_Widget
           echo "</p>";
         }
       }
+            
+      # After the widget
+      echo $after_widget;
     }
   }
 
