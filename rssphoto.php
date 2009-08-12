@@ -3,7 +3,7 @@
  * Plugin Name: RSSPhoto
  * Plugin URI: http://blog.spencerkellis.net/projects/rssphoto
  * Description: Display photos from an RSS or Atom feed
- * Version: 0.3.1
+ * Version: 0.3.2
  * Author: Spencer Kellis
  * Author URI: http://blog.spencerkellis.net
  *
@@ -57,8 +57,10 @@ class RSSPhotoWidget extends WP_Widget
     $url = empty($instance['rssphoto_url']) ? 'http://photography.spencerkellis.net/atom.php' : $instance['rssphoto_url'];
     $fixed = empty($instance['rssphoto_fixed']) ? 'Max' : $instance['rssphoto_fixed'];
     $size = empty($instance['rssphoto_size']) ? 150 : $instance['rssphoto_size'];
-    $sel = empty($instance['rssphoto_sel']) ? 'Random' : $instance['rssphoto_sel'];
+    $img_sel = empty($instance['rssphoto_img_sel']) ? 'First' : $instance['rssphoto_img_sel'];
+    $item_sel = empty($instance['rssphoto_item_sel']) ? 'Random' : $instance['rssphoto_item_sel'];
     $src = empty($instance['rssphoto_src']) ? 'Content' : $instance['rssphoto_src'];
+    $show_title = empty($instance['rssphoto_show_title']) ? 0 : $instance['rssphoto_show_title'];
 
     // initialize SimplePie object
     $feed = new SimplePie();
@@ -69,7 +71,7 @@ class RSSPhotoWidget extends WP_Widget
     if($feed->get_item_quantity() > 0)
     {
       // choose random feed item
-      switch($sel)
+      switch($item_sel)
       {
         case 'Most Recent':
           $item_idx = 0;
@@ -89,6 +91,7 @@ class RSSPhotoWidget extends WP_Widget
         // pull out image url, link
         $content = $item->get_content();
         $description = $item->get_description();
+        $item_title = $item->get_title();
         $item_url = $item->get_link(0);
         if($src == 'Content')
           preg_match_all('/img([^>]*)src="([^"]*)"/i', $content, $m);
@@ -96,9 +99,9 @@ class RSSPhotoWidget extends WP_Widget
           preg_match_all('/img([^>]*)src="([^"]*)"/i', $description, $m);
      
         // pick random image from feed item
-        switch($sel)
+        switch($img_sel)
         {
-          case 'Most Recent':
+          case 'First':
             $image_idx = 0;
             break;
           case 'Random':
@@ -107,10 +110,6 @@ class RSSPhotoWidget extends WP_Widget
             break;
         }
         $image_url = htmlspecialchars_decode($m[2][$image_idx]);
-
-        echo "<!--";
-        echo $image_url."<br>\n";
-        echo "-->";
 
         // attempt to get image dimensions using getimagesize
         list($width, $height, $type, $attr) = getimagesize($image_url);
@@ -162,7 +161,7 @@ class RSSPhotoWidget extends WP_Widget
           {
             $image_filename = md5($image_url)."-$fixed-$size.jpg";
             $thumb_path = "wp-content/cache/$image_filename";
-            $thumb_url = "/$thumb_path";
+            $thumb_url = get_bloginfo('wpurl')."/$thumb_path";
           
             if(!file_exists($thumb_path))
             {
@@ -189,6 +188,12 @@ class RSSPhotoWidget extends WP_Widget
           
           ?>
           <div id="rssphoto_<?php echo $widget_id; ?>_imageDiv">
+          <?php
+          if($show_title)
+          {
+            echo "<h3>$item_title</h3>";
+          }
+          ?>
           <a href="<?php echo $item_url; ?>"><img id="rssphoto_<?php echo $widget_id; ?>_image" src=""></a>
           </div>
           <script type="text/javascript">
@@ -248,8 +253,10 @@ class RSSPhotoWidget extends WP_Widget
     $instance['rssphoto_url'] = strip_tags(stripslashes($new_instance['rssphoto_url']));
     $instance['rssphoto_fixed'] = strip_tags(stripslashes($new_instance['rssphoto_fixed']));
     $instance['rssphoto_size'] = strip_tags(stripslashes($new_instance['rssphoto_size']));
-    $instance['rssphoto_sel'] = strip_tags(stripslashes($new_instance['rssphoto_sel']));
+    $instance['rssphoto_img_sel'] = strip_tags(stripslashes($new_instance['rssphoto_img_sel']));
+    $instance['rssphoto_item_sel'] = strip_tags(stripslashes($new_instance['rssphoto_item_sel']));
     $instance['rssphoto_src'] = strip_tags(stripslashes($new_instance['rssphoto_src']));
+    $instance['rssphoto_show_title'] = strip_tags(stripslashes($new_instance['rssphoto_src']));
 
     return $instance;
   }
@@ -261,40 +268,78 @@ class RSSPhotoWidget extends WP_Widget
   function form($instance)
   {
     //Defaults
-    $instance = wp_parse_args( (array) $instance, array('rssphoto_title'=>'RSSPhoto','rssphoto_url'=>'http://photography.spencerkellis.net/atom.php','rssphoto_size'=>150,'rssphoto_fixed'=>'Max','rssphoto_sel'=>'Random','rssphoto_src'=>'Content') );
+    $instance = wp_parse_args( (array) $instance, array('rssphoto_title'=>'RSSPhoto','rssphoto_url'=>'http://photography.spencerkellis.net/atom.php','rssphoto_size'=>150,'rssphoto_fixed'=>'Max','rssphoto_item_sel'=>'Random','rssphoto_img_sel'=>'First','rssphoto_src'=>'Content') );
 
     $title = htmlspecialchars($instance['rssphoto_title']);
     $url = htmlspecialchars($instance['rssphoto_url']);
     $fixed = htmlspecialchars($instance['rssphoto_fixed']);
     $size = htmlspecialchars($instance['rssphoto_size']);
-    $sel = htmlspecialchars($instance['rssphoto_sel']);
+    $img_sel = htmlspecialchars($instance['rssphoto_img_sel']);
+    $item_sel = htmlspecialchars($instance['rssphoto_item_sel']);
     $src = htmlspecialchars($instance['rssphoto_src']);
 
     //Display form
-    echo '<div style="text-align:right;"><label for="' . $this->get_field_name('rssphoto_title') . '">' . __('Title:') . '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_title') . '" name="' . $this->get_field_name('rssphoto_title') . '" type="text" value="' . $title . '" /></label></div>';
-    echo '<div style="text-align:right;"><label for="' . $this->get_field_name('rssphoto_url')   . '">' . __('URL:')   . '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_url')   . '" name="' . $this->get_field_name('rssphoto_url')   . '" type="text" value="' . $url   . '" /></label></div>';
+
+    echo '<h3>General Settings</h3>';
+
+    // Title
+    echo '<div style="text-align:right; float:left; width:130px;"><label for="' . $this->get_field_name('rssphoto_title') . '">' . __('Title:') . '</label></div>';
+    echo '<div style="text-align:left; float:left; width:350px; padding-left:5px;">';
+    echo '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_title') . '" name="' . $this->get_field_name('rssphoto_title') . '" type="text" value="' . $title . '" />';
+    echo '</div>';
+
+    // URL
+    echo '<div style="text-align:right; float:left; width:130px;"><label for="' . $this->get_field_name('rssphoto_url')   . '">' . __('URL:')   . '</label></div>';
+    echo '<div style="text-align:left; float:left; width:350px; padding-left:5px;">';
+    echo '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_url')   . '" name="' . $this->get_field_name('rssphoto_url')   . '" type="text" value="' . $url   . '" />';
+    echo '</div>';
 
     echo '<div style="clear:both;">&nbsp;</div>';
-    echo '<div style="text-align:right; float:left; width:150px;">' . __('Fixed Dimension:') . '</div>';
+    echo '<h3>Selection Settings</h3>';
+
+    // Feed Item Selection
+    echo '<div style="text-align:right; float:left; width:130px;">' . __('Feed Item Selection:') . '</div>';
+    echo '<div style="text-align:left; float:left; width:350px; padding-left:5px;">';
+    echo '<label for="' . $this->get_field_name('rssphoto_item_sel_random')     . '"><input ' . (($item_sel=='Random') ? 'checked' : '')       . ' type="radio" id="' . $this->get_field_id('rssphoto_item_sel_random')     . '" name="' . $this->get_field_name('rssphoto_item_sel') . '" value="Random">'       . __('Random')       . '</label><br>';
+    echo '<label for="' . $this->get_field_name('rssphoto_item_sel_mostrecent') . '"><input ' . (($item_sel=='Most Recent')  ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_item_sel_mostrecent') . '" name="' . $this->get_field_name('rssphoto_item_sel') . '" value="Most Recent">'  . __('Most Recent')  . '</label><br>';
+    echo '</div>';
+
+    // Image Selection
+    echo '<div style="clear:both;">&nbsp;</div>';
+    echo '<div style="text-align:right; float:left; width:130px;">' . __('Image Selection:') . '</div>';
+    echo '<div style="text-align:left; float:left; width:350px; padding-left:5px;">';
+    echo '<label for="' . $this->get_field_name('rssphoto_img_sel_random') . '"><input ' . (($img_sel=='Random') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_img_sel_random') . '" name="' . $this->get_field_name('rssphoto_img_sel') . '" value="Random">' . __('Random') . '</label><br>';
+    echo '<label for="' . $this->get_field_name('rssphoto_img_sel_first')  . '"><input ' . (($img_sel=='First')  ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_img_sel_first')  . '" name="' . $this->get_field_name('rssphoto_img_sel') . '" value="First">'  . __('First')  . '</label><br>';
+    echo '</div>';
+
+    // Pull Images From
+    echo '<div style="clear:both;">&nbsp;</div>';
+    echo '<div style="text-align:right; float:left; width:130px;">' . __('Pull Images From:') . '</div>';
+    echo '<div style="text-align:left; float:left; width:350px; padding-left:5px;">';
+    echo '<label for="' . $this->get_field_name('rssphoto_src_content')     . '"><input ' . (($src=='Content')     ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_src_content')     . '" name="' . $this->get_field_name('rssphoto_src') . '" value="Content">' . __('Content') . '</label><br>';
+    echo '<label for="' . $this->get_field_name('rssphoto_src_description') . '"><input ' . (($src=='Description') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_src_description') . '" name="' . $this->get_field_name('rssphoto_src') . '" value="Description">' . __('Description') . '</label><br>';
+    echo '</div>';
+
+    echo '<div style="clear:both;">&nbsp;</div>';
+    echo '<h3>Display Settings</h3>';
+
+    // Fixed Dimension
+    echo '<div style="text-align:right; float:left; width:130px;">' . __('Fixed Dimension:') . '</div>';
     echo '<div style="text-align:left; float:left; width:350px; padding-left:5px;">';
     echo '<label for="' . $this->get_field_name('rssphoto_fix_width')  . '"><input ' . (($fixed=='Width')  ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_fix_width')  . '" name="' . $this->get_field_name('rssphoto_fixed') . '" value="Width">'  . __('Width')  . '</label><br>';
     echo '<label for="' . $this->get_field_name('rssphoto_fix_height') . '"><input ' . (($fixed=='Height') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_fix_height') . '" name="' . $this->get_field_name('rssphoto_fixed') . '" value="Height">' . __('Height') . '</label><br>';
     echo '<label for="' . $this->get_field_name('rssphoto_fix_max')    . '"><input ' . (($fixed=='Max')    ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_fix_max')    . '" name="' . $this->get_field_name('rssphoto_fixed') . '" value="Max">'    . __('Max')    . '</label><br>';
-    echo '</div><div style="clear:both;">&nbsp;</div>';
-    echo '<div style="text-align:right;"><label for="' . $this->get_field_name('rssphoto_size')   . '">' . __('Dimension Size (px):')   . '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_size')   . '" name="' . $this->get_field_name('rssphoto_size')   . '" type="text" value="' . $size   . '" /></label></div>';
+    echo '</div>';
 
+    // Dimension Size (px)
     echo '<div style="clear:both;">&nbsp;</div>';
-    echo '<div style="text-align:right; float:left; width:150px;">' . __('Image Selection:') . '</div>';
+    echo '<div style="text-align:right; float:left; width:130px;"><label for="' . $this->get_field_name('rssphoto_size')   . '">' . __('Dimension Size (px):')   . '</label></div>';
     echo '<div style="text-align:left; float:left; width:350px; padding-left:5px;">';
-    echo '<label for="' . $this->get_field_name('rssphoto_sel_random')     . '"><input ' . (($sel=='Random')      ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_sel_random')     . '" name="' . $this->get_field_name('rssphoto_sel') . '" value="Random">' . __('Random') . '</label><br>';
-    echo '<label for="' . $this->get_field_name('rssphoto_sel_mostrecent') . '"><input ' . (($sel=='Most Recent') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_sel_mostrecent') . '" name="' . $this->get_field_name('rssphoto_sel') . '" value="Most Recent">' . __('Most Recent') . '</label><br>';
-    echo '</div><div style="clear:both;">&nbsp;</div>';
+    echo '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_size')   . '" name="' . $this->get_field_name('rssphoto_size')   . '" type="text" value="' . $size   . '" />';
+    echo '</div>';
 
-    echo '<div style="text-align:right; float:left; width:150px;">' . __('Pull Images From:') . '</div>';
-    echo '<div style="text-align:left; float:left; width:350px; padding-left:5px;">';
-    echo '<label for="' . $this->get_field_name('rssphoto_src_content')     . '"><input ' . (($src=='Content')     ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_src_content')     . '" name="' . $this->get_field_name('rssphoto_src') . '" value="Content">' . __('Content') . '</label><br>';
-    echo '<label for="' . $this->get_field_name('rssphoto_src_description') . '"><input ' . (($src=='Description') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_src_description') . '" name="' . $this->get_field_name('rssphoto_src') . '" value="Description">' . __('Description') . '</label><br>';
-    echo '</div><div style="clear:both;">&nbsp;</div>';
+    // Bottom Spacing
+    echo '<div style="clear:both;">&nbsp;</div>';
   }
 
 }// END class

@@ -4,9 +4,9 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, widget
 Requires at least: 2.8
 Tested up to: 2.8.4
-Stable tag: 0.3.1
+Stable tag: 0.3.2
 
-A simple widget to display photos from an RSS or Atom feed.
+A customizable widget to display photos from an RSS or Atom feed.
 
 == Description ==
 
@@ -15,6 +15,9 @@ images load with an animated slide down (if jQuery is available).
 
 RSSPhoto requires the SimplePie Core Wordpress plugin to parse RSS and Atom feeds.  It also requires a cache 
 directory in /wp-content/cache, writable by the server, to store thumbnails in.
+
+The GD library is required for generating thumbnails.  If the GD library is not present, the script will default
+to displaying images with the img width/height attributes forced to thumbnail size.
 
 
 == Installation ==
@@ -38,10 +41,11 @@ Here's a quick description of the settings:
 
    1. Title: text that appears over the image in the sidebar.
    2. URL: address of the RSS or Atom feed.
-   3. Fixed dimension: select whether the width, height, or longest side should be fixed.
-   4. Dimension size: size in pixels of the width, height, or longest side (previously selected).
-   5. Image selection: you can choose to have the script randomly select images or just display the first image in the most recent feed entry.
-   6. Pull images from: some feeds have thumbnail previews in the item description rather than the item content.
+   3. Feed Item Selection: RSSPhoto will choose a random feed item, or the most recent feed item
+   4. Image selection: the script can randomly select images or just display the first image in the feed item
+   5. Pull images from: some feeds have thumbnail previews in the item description rather than the item content.
+   6. Fixed dimension: select whether the width, height, or longest side should be fixed.
+   7. Dimension size: size in pixels of the width, height, or longest side (previously selected).
 
 
 == Frequently Asked Questions ==
@@ -75,9 +79,18 @@ Description and see if it makes a difference.
 
 == Changelog ==
 
+v0.3.2
+
+* Improvement on previous bug fix to use bloginfo 'wpurl' variable to form thumbnail URL
+* Separate out image selection from feed item selection (so you can select a random image from the most recent
+  feed item or vice versa)
+* Improve the display of the Widgets settings as more options were becoming available
+
+
 v0.3.1
 
 * Major bug fix with thumbnail URLs pointing to the wrong location
+
 
 v0.3
 
