@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, widget
 Requires at least: 2.8
 Tested up to: 2.8.4
-Stable tag: 0.3
+Stable tag: 0.3.1
 
 A simple widget to display photos from an RSS or Atom feed.
 
@@ -74,6 +74,10 @@ Description and see if it makes a difference.
 
 
 == Changelog ==
+
+v0.3.1
+
+* Major bug fix with thumbnail URLs pointing to the wrong location
 
 v0.3
 

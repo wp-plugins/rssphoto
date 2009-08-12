@@ -3,7 +3,7 @@
  * Plugin Name: RSSPhoto
  * Plugin URI: http://blog.spencerkellis.net/projects/rssphoto
  * Description: Display photos from an RSS or Atom feed
- * Version: 0.3
+ * Version: 0.3.1
  * Author: Spencer Kellis
  * Author URI: http://blog.spencerkellis.net
  *
@@ -108,6 +108,10 @@ class RSSPhotoWidget extends WP_Widget
         }
         $image_url = htmlspecialchars_decode($m[2][$image_idx]);
 
+        echo "<!--";
+        echo $image_url."<br>\n";
+        echo "-->";
+
         // attempt to get image dimensions using getimagesize
         list($width, $height, $type, $attr) = getimagesize($image_url);
      
@@ -158,7 +162,7 @@ class RSSPhotoWidget extends WP_Widget
           {
             $image_filename = md5($image_url)."-$fixed-$size.jpg";
             $thumb_path = "wp-content/cache/$image_filename";
-            $thumb_url = "http://blog.spencerkellis.net/$thumb_path";
+            $thumb_url = "/$thumb_path";
           
             if(!file_exists($thumb_path))
             {
