@@ -3,7 +3,7 @@
  * Plugin Name: RSSPhoto
  * Plugin URI: http://blog.spencerkellis.net/projects/rssphoto
  * Description: Display photos from an RSS or Atom feed
- * Version: 0.3.2
+ * Version: 0.3.3
  * Author: Spencer Kellis
  * Author URI: http://blog.spencerkellis.net
  *
@@ -122,11 +122,20 @@ class RSSPhotoWidget extends WP_Widget
         list($width, $height, $type, $attr) = getimagesize($image_url);
      
         // if that doesn't work, check for GD and use imagesx/imagesy
-        if($height==false && $width==false && function_exists('imagecreatefromjpeg'))
+        if($height==false && $width==false)
         {
-          $image = @imagecreatefromjpeg($image_url);
-          $height = @imagesy($image);
-          $width = @imagesx($image);
+          if($type==1 && function_exists('imagecreatefromgif'))
+            $image = @imagecreatefromgif($image_url);
+          if($type==2 && function_exists('imagecreatefromjpeg'))
+            $image = @imagecreatefromjpeg($image_url);
+          elseif($type==3 && function_exists('imagecreatefrompng'))
+            $image = @imagecreatefrompng($image_url);
+
+          if($image!=false)
+          {
+            $height = @imagesy($image);
+            $width = @imagesx($image);
+          }
         }
      
         // if we've got valid image dimensions, continue
@@ -174,7 +183,14 @@ class RSSPhotoWidget extends WP_Widget
             {
               // create thumbnail
               if($image == false)
-                $image = @imagecreatefromjpeg($image_url);
+              {
+                if($type==1 && function_exists('imagecreatefromgif'))
+                  $image = @imagecreatefromgif($image_url);
+                if($type==2 && function_exists('imagecreatefromjpeg'))
+                  $image = @imagecreatefromjpeg($image_url);
+                elseif($type==3 && function_exists('imagecreatefrompng'))
+                  $image = @imagecreatefrompng($image_url);
+              }
          
               if($image != false)
               {
