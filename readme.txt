@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, widget
 Requires at least: 2.8
 Tested up to: 2.8.4
-Stable tag: 0.3.3
+Stable tag: 0.4
 
 A customizable widget to display photos from an RSS or Atom feed.
 
@@ -17,7 +17,7 @@ RSSPhoto requires the SimplePie Core Wordpress plugin to parse RSS and Atom feed
 directory in /wp-content/cache, writable by the server, to store thumbnails in.
 
 The GD library is required for generating thumbnails.  If the GD library is not present, the script will default
-to displaying images with the img width/height attributes forced to thumbnail size.
+to displaying images forced to a thumbnail size via html img width/height attributes.
 
 
 == Installation ==
@@ -39,13 +39,16 @@ Probably the easiest way to accomplish step 1 is through an FTP program.  If you
 
 Here's a quick description of the settings:
 
-   1. Title: text that appears over the image in the sidebar.
-   2. URL: address of the RSS or Atom feed.
-   3. Feed Item Selection: RSSPhoto will choose a random feed item, or the most recent feed item
-   4. Image selection: the script can randomly select images or just display the first image in the feed item
-   5. Pull images from: some feeds have thumbnail previews in the item description rather than the item content.
-   6. Fixed dimension: select whether the width, height, or longest side should be fixed.
-   7. Dimension size: size in pixels of the width, height, or longest side (previously selected).
+   1.  Title: text that appears over the image in the sidebar.
+   2.  URL: address of the RSS or Atom feed.
+   3.  Feed Item Selection: RSSPhoto will choose a random feed item, or the most recent feed item
+   4.  Number of Items to Display: how many feed items to pull images from
+   5.  Pull images from: some feeds have thumbnail previews in the item description rather than the item content.
+   6.  Minimum Size (px): images whose width or height is smaller than this value will not be displayed
+   7.  Image selection: the script can randomly select images or just display the first image in the feed item
+   8.  Number of Images to Display: how many images to pull from each feed item
+   9.  Fixed dimension: select whether the width, height, or longest side should be fixed.
+   10. Size (px): size in pixels of the width, height, or longest side (previously selected).
 
 
 == Frequently Asked Questions ==
@@ -70,6 +73,11 @@ a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simple
 Some feeds have thumbnails in a `description` tag instead of the `content` tag.  In the Widget settings, change "Pull image from" to 
 Description and see if it makes a difference.
 
+= I can't seem to get thumbnails larger than X by Y pixels =
+
+Check to make sure the photos in your feed are larger than X by Y pixels - RSSPhoto uses the image actually embedded in the
+feed to generate locally cached thumbnails.
+
 
 == Screenshots ==
 
@@ -78,6 +86,13 @@ Description and see if it makes a difference.
 
 
 == Changelog ==
+
+
+v0.4
+* Added support for multiple images and multiple feed items
+* Added support for filtering out images smaller than a user-defined pixel value (height or width)
+* Reconfigured to the Widget options panel to reduce the height
+
 
 v0.3.3
 
