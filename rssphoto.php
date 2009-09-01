@@ -333,7 +333,7 @@ class RSSPhotoWidget extends WP_Widget
   function create_thumbnail($image_url)
   {
     // attempt to get image dimensions using getimagesize
-    list($width, $height, $type, $attr) = getimagesize($image_url);
+    list($width, $height, $type, $attr) = @getimagesize($image_url);
 
     $thumb_url=false;
     
