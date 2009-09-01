@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow
 Requires at least: 2.8
 Tested up to: 2.8.4
-Stable tag: 0.5
+Stable tag: 0.5.1
 
 A customizable widget to display photos from an RSS or Atom feed.
 
@@ -61,13 +61,17 @@ Fatal error: Class .SimplePie. not found in /home/username/public_html/wp-conten
 
 If you receive this error, the most likely problem is that the SimplePie Core plugin is not installed or activated.  Here's a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin").
 
-= Why won't any images load from my feed, or why do strange images load? =
-
-Some feeds have thumbnails in a `description` tag instead of the `content` tag.  In the Widget settings, change "Pull image from" to Description and see if it makes a difference.
-
 = I can't seem to get thumbnails larger than X by Y pixels =
 
 Check to make sure the photos in your feed are larger than X by Y pixels - RSSPhoto uses the image actually embedded in the feed to generate locally cached thumbnails.
+
+= Is there a way to prevent very small images from being displayed? =
+
+Yes, you can set a variable to require a minimum size (in pixels) of either width or height.  In rssphoto.php, look for 
+
+  private $min_size = 10;
+
+And change the value as needed (default is 10 pixels).
 
 = My feed is valid but has a warning about wrong media type =
 
@@ -83,6 +87,9 @@ private $force_feed = true;
 
 
 == Changelog ==
+
+v0.5.1
+* Bug fix; v0.5 required PHP5.  v0.5.1 should restore PHP4 support.
 
 v0.5
 

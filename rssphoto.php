@@ -3,7 +3,7 @@
  * Plugin Name: RSSPhoto
  * Plugin URI: http://blog.spencerkellis.net/projects/rssphoto
  * Description: Display photos from an RSS or Atom feed
- * Version: 0.5
+ * Version: 0.5.1
  * Author: Spencer Kellis
  * Author URI: http://blog.spencerkellis.net
  *
@@ -32,39 +32,39 @@ class RSSPhotoWidget extends WP_Widget
   /****************************
    * Internally used variables
    ****************************/
-  private $images         = array();
-  private $error_msg      = "";
-  private $widget_id      = -1;
+  var $images         = array();
+  var $error_msg      = "";
+  var $widget_id      = -1;
 
   /****************************
    * Wordpress variables
    ****************************/
-  private $before_widget  = "";
-  private $after_widget   = "";
-  private $before_title   = "";
-  private $after_title    = "";
+  var $before_widget  = "";
+  var $after_widget   = "";
+  var $before_title   = "";
+  var $after_title    = "";
 
   /****************************
    * RSSPhoto options
    ****************************/
-  private $title          = 'RSSPhoto';
-  private $url            = 'http://photography.spencerkellis.net/atom.php';
-  private $fixed          = 'Max';
-  private $size           = 150;
-  private $img_sel        = 'Most Recent';
-  private $num_img        = 1;
-  private $min_size       = 10;
-  private $item_sel       = 'Random';
-  private $num_item       = 1;
-  private $show_title     = 0;
-  private $output         = 'Slideshow';
+  var $title          = 'RSSPhoto';
+  var $url            = 'http://photography.spencerkellis.net/atom.php';
+  var $fixed          = 'Max';
+  var $size           = 150;
+  var $img_sel        = 'Most Recent';
+  var $num_img        = 1;
+  var $min_size       = 10;
+  var $item_sel       = 'Random';
+  var $num_item       = 1;
+  var $show_title     = 0;
+  var $output         = 'Slideshow';
 
   /****************************
    * SimplePie variables
    ****************************/
-  private $feed;
-  private $cache_location = 'wp-content/cache';
-  private $force_feed     = false;
+  var $feed;
+  var $cache_location = 'wp-content/cache';
+  var $force_feed     = false;
   
   /**
   * Declares the RSSPhotoWidget class.
@@ -333,7 +333,7 @@ class RSSPhotoWidget extends WP_Widget
   function create_thumbnail($image_url)
   {
     // attempt to get image dimensions using getimagesize
-    list($width, $height, $type, $attr) = getimagesize($image_url);
+    list($width, $height, $type, $attr) = @getimagesize($image_url);
 
     $thumb_url=false;
     
@@ -459,6 +459,9 @@ class RSSPhotoWidget extends WP_Widget
     $this->images[$idx]['link']=$link;
   }
 
+  /* 
+   * technique from http://jonraasch.com/blog/a-simple-jquery-slideshow 
+   */
   function print_rssphoto_slideshow_html()
   {
     # Before the widget
@@ -554,7 +557,7 @@ class RSSPhotoWidget extends WP_Widget
 function RSSPhotoWidgetInit() 
 {
   register_widget('RSSPhotoWidget');
-  wp_enqueue_script('rssphoto_javascript','/wp-content/plugins/rssphoto/rssphoto.js','jquery');
+  wp_enqueue_script('rssphoto_javascript','/wp-content/plugins/rssphoto/rssphoto.js',array('jquery'));
   wp_enqueue_style('rssphoto_stylesheet','/wp-content/plugins/rssphoto/rssphoto.css');
 }
 
