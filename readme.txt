@@ -1,23 +1,20 @@
 === RSSPhoto ===
 Contributor: spencerkellis
 Donation Link: http://blog.spencerkellis.net/projects/rssphoto
-Tags: RSS, Atom, photoblog, photo, widget
+Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow
 Requires at least: 2.8
 Tested up to: 2.8.4
-Stable tag: 0.4
+Stable tag: 0.5
 
 A customizable widget to display photos from an RSS or Atom feed.
 
 == Description ==
 
-RSSPhoto is a Wordpress widget to display photos from RSS and Atom feeds. It is very easy to configure.  The 
-images load with an animated slide down (if jQuery is available).
+RSSPhoto is a Wordpress widget to display photos from RSS and Atom feeds. It is very easy to configure.  Images load either as a jQuery-powered slideshow or are displayed statically.
 
-RSSPhoto requires the SimplePie Core Wordpress plugin to parse RSS and Atom feeds.  It also requires a cache 
-directory in /wp-content/cache, writable by the server, to store thumbnails in.
+RSSPhoto requires the SimplePie Core Wordpress plugin to parse RSS and Atom feeds.  It also requires a cache directory in /wp-content/cache, writable by the server, to store thumbnails in.
 
-The GD library is required for generating thumbnails.  If the GD library is not present, the script will default
-to displaying images forced to a thumbnail size via html img width/height attributes.
+The GD library is required for generating thumbnails.  If the GD library is not present, the script will default to displaying images with the img width/height attributes forced to thumbnail size.
 
 
 == Installation ==
@@ -26,10 +23,10 @@ Here are the basic installation instructions:
 
    1. Install the SimplePie Core plugin if it's not already installed ([Link](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin")).
    2. If it doesn't already exist, create the directory `/wp-content/cache` and give it permissions of 755
-   3. Upload rssphoto.php to the `/wp-content/plugins/` directory
+   3. Upload rssphoto.php, rssphoto.js, and rssphoto.css to the `/wp-content/plugins/` directory
    4. Activate the plugin through the 'Plugins' menu in Wordpress
    5. Drag the widget to the sidebar in the 'Widgets' section of the 'Appearance' menu in Wordpress
-   6. Configure the widget by specifying title, url, max dimensions, and image selection.
+   6. Configure the widget as needed.
 
 Probably the easiest way to accomplish step 1 is through an FTP program.  If you're interested, here's how to do it on the command line:
 
@@ -39,25 +36,22 @@ Probably the easiest way to accomplish step 1 is through an FTP program.  If you
 
 Here's a quick description of the settings:
 
-   1.  Title: text that appears over the image in the sidebar.
-   2.  URL: address of the RSS or Atom feed.
-   3.  Feed Item Selection: RSSPhoto will choose a random feed item, or the most recent feed item
-   4.  Number of Items to Display: how many feed items to pull images from
-   5.  Pull images from: some feeds have thumbnail previews in the item description rather than the item content.
-   6.  Minimum Size (px): images whose width or height is smaller than this value will not be displayed
-   7.  Image selection: the script can randomly select images or just display the first image in the feed item
-   8.  Number of Images to Display: how many images to pull from each feed item
-   9.  Fixed dimension: select whether the width, height, or longest side should be fixed.
-   10. Size (px): size in pixels of the width, height, or longest side (previously selected).
+   1. Title: text that appears over the image in the sidebar.
+   2. Output: images will load as a slideshow or can be displayed statically
+   3. URL: address of the RSS or Atom feed.
+   4. Item Selection: RSSPhoto will choose a random feed item, or the most recent feed item
+   5. # Items: choose how many feed items to display
+   6. # Images per Item: how many images embedded in each feed item to display
+   7. Image selection: the script can randomly select images or just display the first image in the feed item
+   8. Fixed dimension: select whether the width, height, or longest side should be fixed.
+   9. Size (px): size in pixels of the width, height, or longest side (previously selected).
 
 
 == Frequently Asked Questions ==
 
 = How do I change the title, feed URL, or dimensions? =
 
-After your widget appears in the sidebar, go to the 'Widgets' section under the 'Appearance' menu in Wordpress and open
-the settings for the widget (click the down arrow in the widget titlebar and the form will appear).  Modify the fields as 
-needed and click save.
+After your widget appears in the sidebar, go to the 'Widgets' section under the 'Appearance' menu in Wordpress and open the settings for the widget (click the down arrow in the widget titlebar and the form will appear).  Modify the fields as needed and click save.
 
 = I'm getting an error about the SimplePie class not being found.  What's wrong? =
 
@@ -65,18 +59,21 @@ Here's what the error might look like:
 
 Fatal error: Class .SimplePie. not found in /home/username/public_html/wp-content/plugins/rssphoto/rssphoto.php on line 40
 
-If you receive this error, the most likely problem is that the SimplePie Core plugin is not installed or activated.  Here's
-a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin").
+If you receive this error, the most likely problem is that the SimplePie Core plugin is not installed or activated.  Here's a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin").
 
 = Why won't any images load from my feed, or why do strange images load? =
 
-Some feeds have thumbnails in a `description` tag instead of the `content` tag.  In the Widget settings, change "Pull image from" to 
-Description and see if it makes a difference.
+Some feeds have thumbnails in a `description` tag instead of the `content` tag.  In the Widget settings, change "Pull image from" to Description and see if it makes a difference.
 
 = I can't seem to get thumbnails larger than X by Y pixels =
 
-Check to make sure the photos in your feed are larger than X by Y pixels - RSSPhoto uses the image actually embedded in the
-feed to generate locally cached thumbnails.
+Check to make sure the photos in your feed are larger than X by Y pixels - RSSPhoto uses the image actually embedded in the feed to generate locally cached thumbnails.
+
+= My feed is valid but has a warning about wrong media type =
+
+If you get a warning from the [W3C Feed Validation Service](http://validator.w3.org "W3C Feed Validation Service") about your feed being served with the wrong media type, and RSSPhoto doesn't display your images, it may be an issue where SimplePie refuses to parse the feed because of the incorrect media type.  Open `rssphoto.php` and set the `$force_feed` variable to `true`:
+
+private $force_feed = true;
 
 
 == Screenshots ==
@@ -87,8 +84,19 @@ feed to generate locally cached thumbnails.
 
 == Changelog ==
 
+v0.5
+
+* Added jQuery slideshow option (default)
+* Intelligently selects content or description tag based on feed type
+* Streamlined options to make widget configuration simpler
+* Improved code organization with better class structure and readability
+* Separated Javascript, CSS, and PHP; separated HTML internally
+* !Important: Removed multi-widget support!
+* Added support for solution to display images from a feed with incorrectly identified media type
+
 
 v0.4
+
 * Added support for multiple images and multiple feed items
 * Added support for filtering out images smaller than a user-defined pixel value (height or width)
 * Reconfigured to the Widget options panel to reduce the height
