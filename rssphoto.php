@@ -554,7 +554,7 @@ class RSSPhotoWidget extends WP_Widget
 function RSSPhotoWidgetInit() 
 {
   register_widget('RSSPhotoWidget');
-  wp_enqueue_script('rssphoto_javascript','/wp-content/plugins/rssphoto/rssphoto.js','jquery');
+  wp_enqueue_script('rssphoto_javascript','/wp-content/plugins/rssphoto/rssphoto.js',array('jquery'));
   wp_enqueue_style('rssphoto_stylesheet','/wp-content/plugins/rssphoto/rssphoto.css');
 }
 
