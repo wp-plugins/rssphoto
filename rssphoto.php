@@ -459,6 +459,9 @@ class RSSPhotoWidget extends WP_Widget
     $this->images[$idx]['link']=$link;
   }
 
+  /* 
+   * technique from http://jonraasch.com/blog/a-simple-jquery-slideshow 
+   */
   function print_rssphoto_slideshow_html()
   {
     # Before the widget
