@@ -89,6 +89,7 @@ private $force_feed = true;
 == Changelog ==
 
 v0.5.1
+
 * Bug fix; v0.5 required PHP5.  v0.5.1 should restore PHP4 support.
 
 v0.5
