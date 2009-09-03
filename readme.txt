@@ -87,17 +87,17 @@ Check to make sure the photos in your feed are larger than X by Y pixels - RSSPh
 
 = Is there a way to prevent very small images from being displayed? =
 
-Yes, you can set a variable to require a minimum size (in pixels) of either width or height.  In rssphoto.php, look for 
+Yes, you can set a variable to require a minimum size (in pixels) of either width or height.  In `RSSPhoto.class.php`, look for 
 
-  private $min_size = 10;
+  var $min_size = 10;
 
 And change the value as needed (default is 10 pixels).
 
 = My feed doesn't display any photos; W3C Feed Validation says it's valid but has a warning about wrong media type =
 
-If you get a warning from the [W3C Feed Validation Service](http://validator.w3.org "W3C Feed Validation Service") about your feed being served with the wrong media type, and RSSPhoto doesn't display your images, it may be an issue where SimplePie refuses to parse the feed because of the incorrect media type.  Open `rssphoto.php` and set the `$force_feed` variable to `true`:
+If you get a warning from the [W3C Feed Validation Service](http://validator.w3.org "W3C Feed Validation Service") about your feed being served with the wrong media type, and RSSPhoto doesn't display your images, it may be an issue where SimplePie refuses to parse the feed because of the incorrect media type.  Open `RSSPhoto.class.php` and set the `$force_feed` variable to `true`:
 
-private $force_feed = true;
+var $force_feed = true;
 
 
 == Screenshots ==
