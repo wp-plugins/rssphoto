@@ -1,13 +1,13 @@
 /*
  * RSSPhoto Slideshow Display CSS
  */
-#rssphoto_slideshow 
+.rssphoto_slideshow 
 {
   position: relative;
   margin:auto;
 }
 
-#rssphoto_slideshow div 
+.rssphoto_slideshow div 
 {
   position: absolute;
   top: 0;
@@ -19,25 +19,25 @@
   text-align: center;
 }
 
-#rssphoto_slideshow div.active 
+.rssphoto_slideshow div.active 
 {
   z-index: 102;
   -moz-opacity:1.0; filter:alpha(opacity=100); opacity:1.0;
 }
 
-#rssphoto_slideshow div.last-active 
+.rssphoto_slideshow div.last-active 
 {
   z-index: 101;
 }
 
-#rssphoto_slideshow div a:hover
+.rssphoto_slideshow div a:hover
 {
   border: none;
   text-decoration: none;
-  background-color: none;
+  background-color: transparent;
 }
 
-#rssphoto_slideshow div img
+.rssphoto_slideshow div img
 {
   border: solid black 1px;
   text-decoration: none;
@@ -47,26 +47,26 @@
 /*
  * RSSPhoto Static Display CSS
  */
-#rssphoto_static
+.rssphoto_static
 {
   position: relative;
   margin:auto;
 }
 
-#rssphoto_static div
+.rssphoto_static div
 {
   -moz-opacity:0.0; filter:alpha(opacity=0); opacity:0.0;
   text-align: center;
 }
 
-#rssphoto_static div a:hover
+.rssphoto_static div a:hover
 {
   border: none;
   text-decoration: none;
-  background-color: #fff;
+  background-color: transparent;
 }
 
-#rssphoto_static div img
+.rssphoto_static div img
 {
   border: solid black 1px;
   text-decoration: none;

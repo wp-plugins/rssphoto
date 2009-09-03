@@ -1,20 +1,18 @@
 === RSSPhoto ===
 Contributor: spencerkellis
 Donation Link: http://blog.spencerkellis.net/projects/rssphoto
-Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow
+Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget
 Requires at least: 2.8
 Tested up to: 2.8.4
-Stable tag: 0.5.1
+Stable tag: 0.6
 
-A customizable widget to display photos from an RSS or Atom feed.
+A customizable plugin to display photos from an RSS or Atom feed as a widget or shortcode.
 
 == Description ==
 
-RSSPhoto is a Wordpress widget to display photos from RSS and Atom feeds. It is very easy to configure.  Images load either as a jQuery-powered slideshow or are displayed statically.
+RSSPhoto is a Wordpress plugin to display photos from RSS and Atom feeds. It includes a widget for easy addition to a sidebar, or it can be configured by shortcode to display on any page.  RSSPhoto includes jQuery-powered, cross-browser compatible slideshow as well as static image display.
 
-RSSPhoto requires the SimplePie Core Wordpress plugin to parse RSS and Atom feeds.  It also requires a cache directory in /wp-content/cache, writable by the server, to store thumbnails in.
-
-The GD library is required for generating thumbnails.  If the GD library is not present, the script will default to displaying images with the img width/height attributes forced to thumbnail size.
+RSSPhoto requires the SimplePie Core Wordpress plugin to parse RSS and Atom feeds.  A cache directory, writable by the server, is required for thumbnail storage.  The GD library is required for generating thumbnails.  If the GD library is not present, the script will default to displaying images with the img width/height attributes forced to thumbnail size.
 
 
 == Installation ==
@@ -23,16 +21,38 @@ Here are the basic installation instructions:
 
    1. Install the SimplePie Core plugin if it's not already installed ([Link](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin")).
    2. If it doesn't already exist, create the directory `/wp-content/cache` and give it permissions of 755
-   3. Upload rssphoto.php, rssphoto.js, and rssphoto.css to the `/wp-content/plugins/` directory
+   3. Upload all files to the `/wp-content/plugins/` directory (consider creating an rssphoto subdirectory to hold the plugin files)
    4. Activate the plugin through the 'Plugins' menu in Wordpress
-   5. Drag the widget to the sidebar in the 'Widgets' section of the 'Appearance' menu in Wordpress
-   6. Configure the widget as needed.
 
 Probably the easiest way to accomplish step 1 is through an FTP program.  If you're interested, here's how to do it on the command line:
 
    1. cd {blog-dir}/wp-content
    2. mkdir cache
    3. chmod 755 cache
+
+To use the widget:
+
+   1. Navigate to the 'Widgets' section of the 'Appearance' menu in Wordpress
+   2. Drag the widget to the sidebar
+   3. Configure the widget as needed
+
+To use the shortcode:
+
+   1. Edit the page you want to display the images
+   2. Add the following text to the page:
+
+      [rssphoto url="your.url.com"]
+
+   3. Include any of the following attributes (see descriptions of these settings below)
+
+      * output="Slideshow|Static"
+      * url="your.url.com"
+      * item_sel="Random|Most Recent"
+      * num_item="[Number of feed items]"
+      * num_img="[Number of images per feed item]"
+      * img_sel="Random|Most Recent"
+      * fixed="Width|Height|Max"
+      * size="[size in pixels]"
 
 Here's a quick description of the settings:
 
@@ -73,7 +93,7 @@ Yes, you can set a variable to require a minimum size (in pixels) of either widt
 
 And change the value as needed (default is 10 pixels).
 
-= My feed is valid but has a warning about wrong media type =
+= My feed doesn't display any photos; W3C Feed Validation says it's valid but has a warning about wrong media type =
 
 If you get a warning from the [W3C Feed Validation Service](http://validator.w3.org "W3C Feed Validation Service") about your feed being served with the wrong media type, and RSSPhoto doesn't display your images, it may be an issue where SimplePie refuses to parse the feed because of the incorrect media type.  Open `rssphoto.php` and set the `$force_feed` variable to `true`:
 
@@ -87,6 +107,18 @@ private $force_feed = true;
 
 
 == Changelog ==
+
+v0.6
+
+* Add shortcode support allowing RSSPhoto to be displayed on any page
+* Further improved code organization, separating RSSPhoto code from shortcode and widget code.
+* Re-introduced multi-widget support
+
+
+v0.5.1
+
+* Bug fix; v0.5 required PHP5. v0.5.1 should restore PHP4 support.
+
 
 v0.5
 

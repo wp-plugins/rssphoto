@@ -3,7 +3,7 @@
  * Plugin Name: RSSPhoto
  * Plugin URI: http://blog.spencerkellis.net/projects/rssphoto
  * Description: Display photos from an RSS or Atom feed
- * Version: 0.5
+ * Version: 0.6
  * Author: Spencer Kellis
  * Author URI: http://blog.spencerkellis.net
  *
@@ -38,7 +38,8 @@ require_once('RSSPhotoShortcode.class.php');
 function RSSPhotoWidgetInit() 
 {
   register_widget('RSSPhotoWidget');
-  wp_enqueue_script('rssphoto_javascript','/wp-content/plugins/rssphoto/rssphoto.js','jquery');
+  wp_enqueue_script('jquery');
+  wp_enqueue_script('rssphoto_javascript','/wp-content/plugins/rssphoto/rssphoto.js');
   wp_enqueue_style('rssphoto_stylesheet','/wp-content/plugins/rssphoto/rssphoto.css');
 }
 

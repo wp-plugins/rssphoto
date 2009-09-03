@@ -2,7 +2,7 @@
 
 class RSSPhotoShortcode 
 {
-  private $rssphoto;
+  var $rssphoto;
 
   function RSSPhotoShortcode() 
   {
@@ -31,17 +31,17 @@ class RSSPhotoShortcode
       'output' => 'Slideshow'
     ), $atts ) );
 
-    $instance['rssphoto_url']        = $url;
-    $instance['rssphoto_fixed']      = $fixed;
-    $instance['rssphoto_size']       = $size;
-    $instance['rssphoto_img_sel']    = $img_sel;
-    $instance['rssphoto_num_img']    = $num_img;
-    $instance['rssphoto_item_sel']   = $item_sel;
-    $instance['rssphoto_num_item']   = $num_item;
-    $instance['rssphoto_show_title'] = $show_title;
-    $instance['rssphoto_output']     = $output;
+    $settings['rssphoto_url']        = $url;
+    $settings['rssphoto_fixed']      = $fixed;
+    $settings['rssphoto_size']       = $size;
+    $settings['rssphoto_img_sel']    = $img_sel;
+    $settings['rssphoto_num_img']    = $num_img;
+    $settings['rssphoto_item_sel']   = $item_sel;
+    $settings['rssphoto_num_item']   = $num_item;
+    $settings['rssphoto_show_title'] = $show_title;
+    $settings['rssphoto_output']     = $output;
 
-    $this->rssphoto = new RSSPhoto($instance);
+    $this->rssphoto = new RSSPhoto($settings);
     $this->rssphoto->init();
   }
 }

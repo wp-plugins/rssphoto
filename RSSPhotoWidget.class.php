@@ -3,19 +3,19 @@
 class RSSPhotoWidget extends WP_Widget
 {
   /****************************
-   * Internally used variables
+   * Internal variables
    ****************************/
-  private $error_msg      = "";
-  private $widget_id      = -1;
-  private $rssphoto;
+  var $error_msg      = "";
+  var $widget_id      = -1;
+  var $rssphoto;
 
   /****************************
-   * Wordpress variables
+   * Widget variables
    ****************************/
-  private $before_widget  = "";
-  private $after_widget   = "";
-  private $before_title   = "";
-  private $after_title    = "";
+  var $before_widget  = "";
+  var $after_widget   = "";
+  var $before_title   = "";
+  var $after_title    = "";
   
   /**
   * Declares the RSSPhotoWidget class.
@@ -23,10 +23,12 @@ class RSSPhotoWidget extends WP_Widget
   */
   function RSSPhotoWidget()
   {
+    $prefix = 'rssphoto';
+    $name = __('RSSPhoto Widget');
     $widget_ops = array('classname' => 'widget_rssphoto', 'description' => __( "Display photos from an RSS or Atom feed") );
-    $control_ops = array('width' => 500, 'height' => 300);
+    $control_ops = array('width' => 500, 'height' => 300, 'id_base' => $prefix);
 
-    $this->WP_Widget('rssphoto', __('RSSPhoto'), $widget_ops, $control_ops);
+    $this->WP_Widget($prefix, $name, $widget_ops, $control_ops);
   }
 
   /**

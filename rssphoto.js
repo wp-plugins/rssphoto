@@ -1,10 +1,10 @@
-function slideSwitch() 
+function slideSwitch(id) 
 {
-  var $active = jQuery('#rssphoto_slideshow div.active');
+  var $active = jQuery(".rssphoto_slideshow#rssphoto-"+id+" div.active");
   if ( $active.length == 0 )
-    $active = jQuery('#rssphoto_slideshow div:last');
+    $active = jQuery(".rssphoto_slideshow#rssphoto-"+id+" div:last");
 
-  var $next = $active.next().length ? $active.next() : jQuery('#rssphoto_slideshow div:first');
+  var $next = $active.next().length ? $active.next() : jQuery(".rssphoto_slideshow#rssphoto-"+id+" div:first");
 
   $active.addClass('last-active')
     .animate({opacity : 0.0}, 1000);
@@ -16,22 +16,7 @@ function slideSwitch()
     });
 }
 
-function expandStatic()
+function expandStatic(id)
 {
-  jQuery('#rssphoto_static div').animate({opacity: 1.0}, 1000, function() {});
-}
-
-if(typeof jQuery != 'undefined')
-{
-  jQuery(function() 
-  {
-    if(jQuery('#rssphoto_slideshow').length > 0)
-    {
-      setInterval( "slideSwitch()", 6000 );
-    }
-    else if(jQuery('#rssphoto_static').length > 0)
-    {
-      expandStatic();
-    }
-  });
+  jQuery(".rssphoto_static#rssphoto-"+id+" div").animate({opacity: 1.0}, 1000, function() {});
 }

@@ -3,40 +3,44 @@
 class RSSPhoto
 {
   /****************************
-   * Internally used variables
+   * Internal variables
    ****************************/
-  private $images         = array();
-  private $error_msg      = "";
+  var $images         = array();
+  var $error_msg      = "";
+  var $id             = -1;
 
   /****************************
-   * RSSPhoto options
+   * RSSPhoto settings
    ****************************/
-  private $title          = 'RSSPhoto';
-  private $url            = 'http://photography.spencerkellis.net/atom.php';
-  private $fixed          = 'Max';
-  private $size           = 150;
-  private $img_sel        = 'Most Recent';
-  private $num_img        = 1;
-  private $min_size       = 10;
-  private $item_sel       = 'Random';
-  private $num_item       = 1;
-  private $show_title     = 0;
-  private $output         = 'Slideshow';
+  var $title          = 'RSSPhoto';
+  var $url            = 'http://photography.spencerkellis.net/atom.php';
+  var $fixed          = 'Max';
+  var $size           = 150;
+  var $img_sel        = 'Most Recent';
+  var $num_img        = 1;
+  var $min_size       = 10;
+  var $item_sel       = 'Random';
+  var $num_item       = 1;
+  var $show_title     = 0;
+  var $output         = 'Slideshow';
+  var $interval       = 6000;
 
   /****************************
-   * SimplePie variables
+   * SimplePie settings
    ****************************/
-  private $feed;
-  private $cache_location = 'wp-content/cache';
-  private $force_feed     = false;
+  var $feed;
+  var $cache_location = 'wp-content/cache';
+  var $force_feed     = false;
 
-  function RSSPhoto($instance=array())
+  function RSSPhoto($settings=array())
   {
-    $this->update($instance);
+    $this->update($settings);
   }
 
   function init()
   {
+    $this->id = rand();
+
     // initialize SimplePie object
     $this->feed = new SimplePie();
     $this->feed->set_cache_location($this->cache_location);
@@ -124,7 +128,7 @@ class RSSPhoto
   function create_thumbnail($image_url)
   {
     // attempt to get image dimensions using getimagesize
-    list($width, $height, $type, $attr) = getimagesize($image_url);
+    list($width, $height, $type, $attr) = @getimagesize($image_url);
 
     $thumb_url=false;
     
@@ -252,7 +256,7 @@ class RSSPhoto
 
   function slideshow_html()
   {
-    $html = '<div id="rssphoto_slideshow" style="height:'.$this->size.'px;">';
+    $html = '<div class="rssphoto_slideshow" id="rssphoto-'.$this->id.'" style="height:'.$this->size.'px;">';
 
     $active=0;
     foreach($this->images as $img)
@@ -264,20 +268,30 @@ class RSSPhoto
         $active=1;
       }
       $html .= '><a href="'.$img['link'].'"><img src="'.$img['url'].'" alt="" /></a></div>';
+      $html .= "\n";
     }
     $html .= '</div>';
+    $html .= "\n";
+
+    $html .= '<script type="text/javascript">setInterval( "slideSwitch('.$this->id.')", '.$this->interval.' );</script>';
+    $html .= "\n";
 
     return $html;
   }
 
   function static_html()
   {
-    $html = '<div id="rssphoto_static">';
+    $html = '<div class="rssphoto_static" id="rssphoto-'.$this->id.'">';
     foreach($this->images as $img)
     {
       $html .= '<div><a href="'.$img['link'].'"><img src="'.$img['url'].'"></a></div>';
+      $html .= "\n";
     }
     $html .= '</div>';
+    $html .= "\n";
+
+    $html .= '<script type="text/javascript">expandStatic('.$this->id.');</script>';
+    $html .= "\n";
 
     return $html;
   }
@@ -287,17 +301,18 @@ class RSSPhoto
     return $this->title;
   }
 
-  function update($instance)
+  function update($settings)
   {
-    if(!empty($instance['rssphoto_title']))      $this->title      = $instance['rssphoto_title'];
-    if(!empty($instance['rssphoto_url']))        $this->url        = $instance['rssphoto_url'];
-    if(!empty($instance['rssphoto_fixed']))      $this->fixed      = $instance['rssphoto_fixed'];
-    if(!empty($instance['rssphoto_size']))       $this->size       = $instance['rssphoto_size'];
-    if(!empty($instance['rssphoto_img_sel']))    $this->img_sel    = $instance['rssphoto_img_sel'];
-    if(!empty($instance['rssphoto_num_img']))    $this->num_img    = $instance['rssphoto_num_img'];
-    if(!empty($instance['rssphoto_item_sel']))   $this->item_sel   = $instance['rssphoto_item_sel'];
-    if(!empty($instance['rssphoto_num_item']))   $this->num_item   = $instance['rssphoto_num_item'];
-    if(!empty($instance['rssphoto_show_title'])) $this->show_title = $instance['rssphoto_show_title'];
-    if(!empty($instance['rssphoto_output']))     $this->output     = $instance['rssphoto_output'];
+    if(!empty($settings['rssphoto_title']))      $this->title      = $settings['rssphoto_title'];
+    if(!empty($settings['rssphoto_url']))        $this->url        = $settings['rssphoto_url'];
+    if(!empty($settings['rssphoto_fixed']))      $this->fixed      = $settings['rssphoto_fixed'];
+    if(!empty($settings['rssphoto_size']))       $this->size       = $settings['rssphoto_size'];
+    if(!empty($settings['rssphoto_img_sel']))    $this->img_sel    = $settings['rssphoto_img_sel'];
+    if(!empty($settings['rssphoto_num_img']))    $this->num_img    = $settings['rssphoto_num_img'];
+    if(!empty($settings['rssphoto_item_sel']))   $this->item_sel   = $settings['rssphoto_item_sel'];
+    if(!empty($settings['rssphoto_num_item']))   $this->num_item   = $settings['rssphoto_num_item'];
+    if(!empty($settings['rssphoto_show_title'])) $this->show_title = $settings['rssphoto_show_title'];
+    if(!empty($settings['rssphoto_output']))     $this->output     = $settings['rssphoto_output'];
+    if(!empty($settings['rssphoto_interval']))   $this->interval   = $settings['rssphoto_interval'];
   }
 }
