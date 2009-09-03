@@ -1,7 +1,7 @@
 === RSSPhoto ===
 Contributor: spencerkellis
 Donation Link: http://blog.spencerkellis.net/projects/rssphoto
-Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget
+Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget, shortcode
 Requires at least: 2.8
 Tested up to: 2.8.4
 Stable tag: 0.6
