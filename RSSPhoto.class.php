@@ -25,6 +25,7 @@ class RSSPhoto
   var $images         = array();
   var $error_msg      = "";
   var $id             = -1;
+  var $show_desc      = false;
 
   /****************************
    * RSSPhoto settings
@@ -97,7 +98,7 @@ class RSSPhoto
             $thumb_url = $this->create_thumbnail($url,$fixed,$size,$min_size);
             if($thumb_url!=false)
             {
-              $this->add_image($thumb_url,$item_url);
+              $this->add_image($thumb_url,$item_url,$item->get_description());
             }
           }
         }
@@ -257,11 +258,12 @@ class RSSPhoto
   * Add image to array
   *
   */
-  function add_image($url,$link)
+  function add_image($url,$link,$desc)
   {
     $idx=count($this->images);
     $this->images[$idx]['url']=$url;
     $this->images[$idx]['link']=$link;
+    $this->images[$idx]['desc']=$desc;
   }
 
   function slideshow_html()
@@ -298,6 +300,10 @@ class RSSPhoto
     foreach($this->images as $img)
     {
       $html .= '<div><a href="'.$img['link'].'"><img src="'.$img['url'].'"></a></div>';
+      if($this->show_desc)
+      {
+        $html .= '<p>'.$img['desc'].'</p>';
+      }
       $html .= "\n";
     }
     $html .= '</div>';
@@ -362,5 +368,4 @@ class RSSPhoto
     }
     return $urls;
   }
-
 }
