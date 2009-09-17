@@ -1,5 +1,22 @@
 <?php
 
+/*  Copyright 2009 Spencer Kellis (email : spencerkellis *AT* gmail)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
 class RSSPhoto
 {
   /****************************
@@ -48,12 +65,10 @@ class RSSPhoto
     $this->feed->force_feed($this->force_feed);
     $this->feed->init();
 
-    // get images, generation thumbnails, etc.
-    $num_item = ($this->num_item < $this->feed->get_item_quantity()) ? $this->num_item : $this->feed->get_item_quantity();
-
-    if($num_item > 0)
+    // get images, generate thumbnails, etc.
+    if($this->feed->get_item_quantity() > 0)
     {
-      $item_idxs = $this->select_indices($this->item_sel,$this->feed->get_items(),$num_item);
+      $item_idxs = $this->select_indices($this->feed->get_items(),$this->item_sel,$this->num_item);
 
       // choose feed item(s)
       foreach($item_idxs as $item_idx)
@@ -67,28 +82,22 @@ class RSSPhoto
           $item_url = $item->get_link(0);
           if($this->feed->get_type() & SIMPLEPIE_TYPE_RSS_ALL)
           {
-            $str = $item->get_description();
+            if($enclosures = $item->get_enclosures())
+              $image_url = $this->get_img_urls($enclosures,$this->img_sel,$this->num_img,'Enclosures');
+            else
+              $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Description');
           }
           elseif ($this->feed->get_type() & SIMPLEPIE_TYPE_ATOM_ALL)
           {
-            $str = $item->get_content();
+            $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Content');
           }
-          preg_match_all('/img([^>]*)src="([^"]*)"/i', $str, $m);
 
-          if(count($m[2])>0)
+          foreach($image_url as $url)
           {
-            $num_img = ($this->num_img < count($m[2])) ? $this->num_img : count($m[2]);
-            $img_idxs = $this->select_indices($this->img_sel,$m[2],$num_img);
-
-            // choose image(s)
-            foreach($img_idxs as $img_idx)
+            $thumb_url = $this->create_thumbnail($url,$fixed,$size,$min_size);
+            if($thumb_url!=false)
             {
-              $image_url = htmlspecialchars_decode($m[2][$img_idx]);
-              $thumb_url = $this->create_thumbnail($image_url,$fixed,$size,$min_size);
-              if($thumb_url!=false)
-              {
-                $this->add_image($thumb_url,$item_url);
-              }
+              $this->add_image($thumb_url,$item_url);
             }
           }
         }
@@ -225,8 +234,9 @@ class RSSPhoto
   * Get indices of images from array
   *
   */
-  function select_indices($method,$arr,$num)
+  function select_indices($arr,$method,$num)
   {
+    $num = ($num < count($arr)) ? $num : count($arr);
     switch($method)
     {
       case 'Most Recent':
@@ -273,8 +283,11 @@ class RSSPhoto
     $html .= '</div>';
     $html .= "\n";
 
-    $html .= '<script type="text/javascript">setInterval( "slideSwitch('.$this->id.')", '.$this->interval.' );</script>';
-    $html .= "\n";
+    if(count($this->images)>1)
+    {
+      $html .= '<script type="text/javascript">setInterval( "slideSwitch('.$this->id.')", '.$this->interval.' );</script>';
+      $html .= "\n";
+    }
 
     return $html;
   }
@@ -315,4 +328,39 @@ class RSSPhoto
     if(!empty($settings['rssphoto_output']))     $this->output     = $settings['rssphoto_output'];
     if(!empty($settings['rssphoto_interval']))   $this->interval   = $settings['rssphoto_interval'];
   }
+
+  function get_img_urls($arr,$sel,$num,$field)
+  {
+    switch($field)
+    {
+      case 'Content':
+        preg_match_all('/img([^>]*)src="([^"]*)"/i', $arr->get_content(), $m);
+        if(count($m[2])>0)
+        {
+          $img_idxs = $this->select_indices($m[2],$sel,$num);
+          foreach($img_idxs as $img_idx)
+            $urls[count($urls)] = htmlspecialchars_decode($m[2][$img_idx]);
+        }
+        break;
+      case 'Description':
+        preg_match_all('/img([^>]*)src="([^"]*)"/i', $arr->get_description(), $m);
+        if(count($m[2])>0)
+        {
+          $img_idxs = $this->select_indices($m[2],$sel,$num);
+          foreach($img_idxs as $img_idx)
+            $urls[count($urls)] = htmlspecialchars_decode($m[2][$img_idx]);
+        }
+        break;
+      case 'Enclosures':
+        $img_idxs = $this->select_indices($arr,$sel,$num);
+        foreach($img_idxs as $idx)
+        {
+          if(!strcmp($arr[$idx]->get_type(),'image/jpeg'))
+            $urls[count($urls)] = htmlspecialchars_decode($arr[$idx]->get_link());
+        }
+        break;
+    }
+    return $urls;
+  }
+
 }
