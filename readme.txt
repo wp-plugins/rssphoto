@@ -109,6 +109,7 @@ var $force_feed = true;
 == Changelog ==
 
 v0.6.1
+
 * Add support for images contained in RSS enclosure tags
 * Fixed an annoyance where slideshow would play with only one image
 
