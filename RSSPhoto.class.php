@@ -28,6 +28,11 @@ class RSSPhoto
   var $show_desc      = false;
 
   /****************************
+   * RSSPhoto temp vars
+   ****************************/
+  var $rss_type_src   = 'Choose'; // 'Choose' or 'Enclosures' or 'Description' or 'Content'*
+
+  /****************************
    * RSSPhoto settings
    ****************************/
   var $title          = 'RSSPhoto';
@@ -83,23 +88,44 @@ class RSSPhoto
           $item_url = $item->get_link(0);
           if($this->feed->get_type() & SIMPLEPIE_TYPE_RSS_ALL)
           {
-            if($enclosures = $item->get_enclosures())
-              $image_url = $this->get_img_urls($enclosures,$this->img_sel,$this->num_img,'Enclosures');
-            else
-              $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Description');
+            switch($this->rss_type_src)
+            {
+              case 'Enclosures':
+                $image_url = $this->get_img_urls($enclosures,$this->img_sel,$this->num_img,'Enclosures');
+                break;
+              case 'Description':
+                $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Description');
+                break;
+              case 'Content':
+                $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Content');
+                break;
+              case 'Choose':
+                if($enclosures = $item->get_enclosures())
+                  $image_url = $this->get_img_urls($enclosures,$this->img_sel,$this->num_img,'Enclosures');
+                else
+                  $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Description');
+                break;
+            }
           }
           elseif ($this->feed->get_type() & SIMPLEPIE_TYPE_ATOM_ALL)
           {
             $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Content');
           }
 
-          foreach($image_url as $url)
+          if(is_array($image_url))
           {
-            $thumb_url = $this->create_thumbnail($url,$fixed,$size,$min_size);
-            if($thumb_url!=false)
+            foreach($image_url as $url)
             {
-              $this->add_image($thumb_url,$item_url,$item->get_description());
+              $thumb_url = $this->create_thumbnail($url,$fixed,$size,$min_size);
+              if($thumb_url!=false)
+              {
+                $this->add_image($thumb_url,$item_url,$item->get_description());
+              }
             }
+          }
+          else
+          {
+            $this->set_error('$image_url isn\'t an array');
           }
         }
         else // item==false
@@ -367,5 +393,10 @@ class RSSPhoto
         break;
     }
     return $urls;
+  }
+
+  function set_error($str)
+  {
+    $this->error_msg=$str;
   }
 }

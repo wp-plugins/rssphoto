@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget, shortcode
 Requires at least: 2.8
 Tested up to: 2.8.4
-Stable tag: 0.6.1
+Stable tag: 0.6.2
 
 A customizable plugin to display photos from an RSS or Atom feed as a widget or shortcode.
 
@@ -107,6 +107,11 @@ var $force_feed = true;
 
 
 == Changelog ==
+
+v0.6.2
+
+* Added a method for retrieving images from different portions of an RSS 2.0 feed (Atom feeds remain the same)
+
 
 v0.6.1
 
