@@ -61,7 +61,7 @@ To integrate with a theme:
    3. Declare RSSPhoto settings (multiple instances are supported).
    4. Call the function display_rssphoto() from your theme (e.g., sidebar.php). An example of the last two steps:
 
-      <?php
+      `<?php
       $settings[0]['title']='RSSPhoto';
       $settings[0]['url']='http://photography.spencerkellis.net/rss.php';
       $settings[0]['output']='Slideshow';
@@ -74,7 +74,7 @@ To integrate with a theme:
       $settings[0]['before_html']='<li>';
       $settings[0]['after_html']='</li>';
       display_rssphoto($settings[0]);
-      ?>
+      ?>`
 
 Here's a quick description of the settings:
 
