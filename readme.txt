@@ -3,14 +3,14 @@ Contributor: spencerkellis
 Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget, shortcode
 Requires at least: 2.8
-Tested up to: 2.8.4
-Stable tag: 0.6.2
+Tested up to: 2.8.6
+Stable tag: 0.6.3
 
 A customizable plugin to display photos from an RSS or Atom feed as a widget or shortcode.
 
 == Description ==
 
-RSSPhoto is a Wordpress plugin to display photos from RSS and Atom feeds. It includes a widget for easy addition to a sidebar, or it can be configured by shortcode to display on any page.  RSSPhoto includes jQuery-powered, cross-browser compatible slideshow as well as static image display.
+RSSPhoto is a Wordpress plugin to display photos from RSS and Atom feeds. It includes a widget for easy addition to a sidebar, or it can be configured by shortcode to display on any page.  Easy theme integration is also possible.  RSSPhoto includes jQuery-powered, cross-browser compatible slideshow as well as static image display.
 
 RSSPhoto requires the SimplePie Core Wordpress plugin to parse RSS and Atom feeds.  A cache directory, writable by the server, is required for thumbnail storage.  The GD library is required for generating thumbnails.  If the GD library is not present, the script will default to displaying images with the img width/height attributes forced to thumbnail size.
 
@@ -53,6 +53,28 @@ To use the shortcode:
       * img_sel="Random|Most Recent"
       * fixed="Width|Height|Max"
       * size="[size in pixels]"
+
+To integrate with a theme:
+
+   1. The plugin needs to be installed and activated.
+   2. Copy and paste the contents of the file RSSPhotoTheme.functions.php to the end of the file functions.php in your theme directory.
+   3. Declare RSSPhoto settings (multiple instances are supported).
+   4. Call the function display_rssphoto() from your theme (e.g., sidebar.php). An example of the last two steps:
+
+      <?php
+      $settings[0]['title']='RSSPhoto';
+      $settings[0]['url']='http://photography.spencerkellis.net/rss.php';
+      $settings[0]['output']='Slideshow';
+      $settings[0]['num_item']=10;
+      $settings[0]['interval']=10000;
+      $settings[0]['fixed']='Height';
+      $settings[0]['size']=80;
+      $settings[0]['before_title']='<h2>';
+      $settings[0]['after_title']='</h2>';
+      $settings[0]['before_html']='<li>';
+      $settings[0]['after_html']='</li>';
+      display_rssphoto($settings[0]);
+      ?>
 
 Here's a quick description of the settings:
 
@@ -107,6 +129,11 @@ var $force_feed = true;
 
 
 == Changelog ==
+
+v0.6.3
+
+* Added support for theme integration
+
 
 v0.6.2
 
