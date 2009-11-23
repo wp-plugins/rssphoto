@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget, shortcode
 Requires at least: 2.8
 Tested up to: 2.8.6
-Stable tag: 0.6.3
+Stable tag: 0.6.4
 
 A customizable plugin to display photos from an RSS or Atom feed as a widget or shortcode.
 
@@ -121,6 +121,10 @@ If you get a warning from the [W3C Feed Validation Service](http://validator.w3.
 
 var $force_feed = true;
 
+= My feed doesn't display any photos and there are no problems with the feed validation =
+
+RSS feeds can be implemented in numerous ways.  RSSPhoto attempts to intelligently find the pictures in an RSS feed, but sometimes you need to point it in the right direction.  In `RSSPhoto.class.php`, try changing the value of the variable `$rss_type_src` to one of the following values: 'Choose' (default), 'Description', 'Content', or 'Enclosures'.
+
 
 == Screenshots ==
 
@@ -129,6 +133,11 @@ var $force_feed = true;
 
 
 == Changelog ==
+
+v0.6.4
+
+* Added support for MobileMe (Apple) RSS feeds
+
 
 v0.6.3
 

@@ -26,6 +26,7 @@ class RSSPhoto
   var $error_msg      = "";
   var $id             = -1;
   var $show_desc      = false;
+  var $mime_types     = array('image/jpeg','image/jpg','image/gif','image/png');
 
   /****************************
    * RSSPhoto temp vars
@@ -387,8 +388,14 @@ class RSSPhoto
         $img_idxs = $this->select_indices($arr,$sel,$num);
         foreach($img_idxs as $idx)
         {
-          if(!strcmp($arr[$idx]->get_type(),'image/jpeg'))
-            $urls[count($urls)] = htmlspecialchars_decode($arr[$idx]->get_link());
+          foreach($this->mime_types as $mime)
+          {
+            if(!strcmp($arr[$idx]->get_type(),$mime))
+            {
+              $urls[count($urls)] = htmlspecialchars_decode($arr[$idx]->get_link());
+              break;
+            }
+          }
         }
         break;
     }
