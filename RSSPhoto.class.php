@@ -27,6 +27,7 @@ class RSSPhoto
   var $id             = -1;
   var $show_desc      = false;
   var $mime_types     = array('image/jpeg','image/jpg','image/gif','image/png');
+  var $mediums        = array('image');
 
   /****************************
    * RSSPhoto temp vars
@@ -282,6 +283,61 @@ class RSSPhoto
   }
 
   /**
+  * Check array elements
+  *
+  */
+  function check_indices($arr)
+  {
+    for($k=count($arr)-1; $k>=0; $k--)
+    {
+      // check for empty object
+      if(empty($arr[$k]))
+      {
+        unset($arr[$k]);
+        break;
+      }
+
+      // check for url 
+      $lnk=$arr[$k]->get_link(); // some bug that kills php if this isn't separated out
+      if(empty($lnk))
+      {
+        unset($arr[$k]); 
+        break;
+      }
+
+      // check for compatible image type
+      $mime_flag=0;
+      $medium_flag=0;
+      foreach($this->mime_types as $mime)
+      {
+        if(!strcmp($arr[$k]->get_type(),$mime))
+        {
+          $mime_flag=1;
+          break;
+        }
+      }
+      foreach($this->mediums as $medium)
+      {
+        if(!strcmp($arr[$k]->get_medium(),$medium))
+        {
+          $medium_flag=1;
+          break;
+        }
+      }
+      
+      // if neither mime or medium, discard
+      if(!($mime_flag | $medium_flag))
+      {
+        unset($arr[$k]);
+        break;
+      }
+    }
+
+    $arr=array_values($arr);
+    return $arr;
+  }
+
+  /**
   * Add image to array
   *
   */
@@ -385,17 +441,11 @@ class RSSPhoto
         }
         break;
       case 'Enclosures':
+        $arr=$this->check_indices($arr);
         $img_idxs = $this->select_indices($arr,$sel,$num);
         foreach($img_idxs as $idx)
         {
-          foreach($this->mime_types as $mime)
-          {
-            if(!strcmp($arr[$idx]->get_type(),$mime))
-            {
-              $urls[count($urls)] = htmlspecialchars_decode($arr[$idx]->get_link());
-              break;
-            }
-          }
+          $urls[count($urls)] = htmlspecialchars_decode($arr[$idx]->get_link());
         }
         break;
     }
