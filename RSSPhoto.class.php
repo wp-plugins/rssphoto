@@ -120,9 +120,7 @@ class RSSPhoto
             {
               $thumb_url = $this->create_thumbnail($url,$fixed,$size,$min_size);
               if($thumb_url!=false)
-              {
                 $this->add_image($thumb_url,$item_url,$item->get_description());
-              }
             }
           }
           else
@@ -165,73 +163,70 @@ class RSSPhoto
   */
   function create_thumbnail($image_url)
   {
-    // attempt to get image dimensions using getimagesize
-    list($width, $height, $type, $attr) = @getimagesize($image_url);
-
-    $thumb_url=false;
-    
-    // if that doesn't work, check for GD and use imagesx/imagesy
-    if($height==false && $width==false)
+    $image_filename = "rssphoto-".md5($image_url)."-{$this->fixed}-{$this->size}.jpg";
+    $thumb_path = $this->cache_location."/".$image_filename;
+    $thumb_url = get_bloginfo('wpurl')."/$thumb_path";
+    if(!file_exists($thumb_path))
     {
-      if($type==1 && function_exists('imagecreatefromgif'))
-        $image = @imagecreatefromgif($image_url);
-      if($type==2 && function_exists('imagecreatefromjpeg'))
-        $image = @imagecreatefromjpeg($image_url);
-      elseif($type==3 && function_exists('imagecreatefrompng'))
-        $image = @imagecreatefrompng($image_url);
-    
-      if($image!=false)
+      // attempt to get image dimensions using getimagesize
+      list($width, $height, $type, $attr) = @getimagesize($image_url);
+      
+      // if that doesn't work, check for GD and use imagesx/imagesy
+      if($height==false || $width==false)
       {
-        $height = @imagesy($image);
-        $width = @imagesx($image);
+        if($type==1 && function_exists('imagecreatefromgif'))
+          $image = @imagecreatefromgif($image_url);
+        if($type==2 && function_exists('imagecreatefromjpeg'))
+          $image = @imagecreatefromjpeg($image_url);
+        elseif($type==3 && function_exists('imagecreatefrompng'))
+          $image = @imagecreatefrompng($image_url);
+
+        if($image==false)
+          return false;
+        else
+        {
+          $height = @imagesy($image);
+          $width = @imagesx($image);
+        }
       }
-    }
-
-    if($height<=$this->min_size|| $width<=$this->min_size)
-      return false;
-    
-    // if we've got valid image dimensions, continue
-    if($height!=false && $width!=false)
-    {
-      // default parameters
-      switch($this->fixed)
+     
+      if($height<=$this->min_size || $width<=$this->min_size)
+        return false;
+      
+      // if we've got valid image dimensions, continue
+      if($height!=false && $width!=false)
       {
-        case 'Width':
-          $ratio = $this->size/$width;
-          $thumb_width = $this->size;
-          $thumb_height = $height * $ratio;
-          break;
-        case 'Height':
-          $ratio = $this->size/$height;
-          $thumb_height = $this->size;
-          $thumb_width = $width * $ratio;
-          break;
-        case 'Max':
-        default:
-          $ratio = $this->size/max($height,$width);
-          if($width>$height)
-          {
+        // default parameters
+        switch($this->fixed)
+        {
+          case 'Width':
+            $ratio = $this->size/$width;
             $thumb_width = $this->size;
             $thumb_height = $height * $ratio;
-          }
-          else
-          {
+            break;
+          case 'Height':
+            $ratio = $this->size/$height;
             $thumb_height = $this->size;
             $thumb_width = $width * $ratio;
-          }
-          break;
-      }
-      $thumb_url = $image_url;
-
-      // use GD library to create cached thumbnail if necessary
-      if(($width>$thumb_width || $height>$thumb_height) &&
-         function_exists('imagecreatefromjpeg'))
-      {
-        $image_filename = "rssphoto-".md5($image_url)."-{$this->fixed}-{$this->size}.jpg";
-        $thumb_path = $this->cache_location."/".$image_filename;
-        $thumb_url = get_bloginfo('wpurl')."/$thumb_path";
-
-        if(!file_exists($thumb_path))
+            break;
+          case 'Max':
+          default:
+            $ratio = $this->size/max($height,$width);
+            if($width>$height)
+            {
+              $thumb_width = $this->size;
+              $thumb_height = $height * $ratio;
+            }
+            else
+            {
+              $thumb_height = $this->size;
+              $thumb_width = $width * $ratio;
+            }
+            break;
+        }
+     
+        // use GD library to create cached thumbnail if necessary
+        if(function_exists('imagecreatefromjpeg'))
         {
           // create thumbnail
           if($image == false)
@@ -243,7 +238,7 @@ class RSSPhoto
             elseif($type==3 && function_exists('imagecreatefrompng'))
               $image = @imagecreatefrompng($image_url);
           }
-
+     
           if($image != false)
           {
             $quality = 85;
@@ -252,8 +247,8 @@ class RSSPhoto
             @imagejpeg($thumb,$thumb_path,$quality);
           }
         }
-      }
-    } // if($height!=false && width!=false)
+      } // if($height!=false && width!=false)
+    } // if(!file_exists($thumb_path))
 
     return $thumb_url;
 
@@ -297,39 +292,42 @@ class RSSPhoto
         break;
       }
 
-      // check for url 
-      $lnk=$arr[$k]->get_link(); // some bug that kills php if this isn't separated out
-      if(empty($lnk))
+      if(is_object($arr[$k]))
       {
-        unset($arr[$k]); 
-        break;
-      }
+        // check for url 
+        $lnk=$arr[$k]->get_link(); // some bug that kills php if this isn't separated out
+        if(empty($lnk))
+        {
+          unset($arr[$k]); 
+          break;
+        }
+       
+        // check for compatible image type
+        $mime_flag=0;
+        $medium_flag=0;
+        foreach($this->mime_types as $mime)
+        {
+          if(!strcmp($arr[$k]->get_type(),$mime))
+          {
+            $mime_flag=1;
+            break;
+          }
+        }
+        foreach($this->mediums as $medium)
+        {
+          if(!strcmp($arr[$k]->get_medium(),$medium))
+          {
+            $medium_flag=1;
+            break;
+          }
+        }
 
-      // check for compatible image type
-      $mime_flag=0;
-      $medium_flag=0;
-      foreach($this->mime_types as $mime)
-      {
-        if(!strcmp($arr[$k]->get_type(),$mime))
+        // if neither mime or medium, discard
+        if(!($mime_flag | $medium_flag))
         {
-          $mime_flag=1;
+          unset($arr[$k]);
           break;
         }
-      }
-      foreach($this->mediums as $medium)
-      {
-        if(!strcmp($arr[$k]->get_medium(),$medium))
-        {
-          $medium_flag=1;
-          break;
-        }
-      }
-      
-      // if neither mime or medium, discard
-      if(!($mime_flag | $medium_flag))
-      {
-        unset($arr[$k]);
-        break;
       }
     }
 
@@ -445,7 +443,10 @@ class RSSPhoto
         $img_idxs = $this->select_indices($arr,$sel,$num);
         foreach($img_idxs as $idx)
         {
-          $urls[count($urls)] = htmlspecialchars_decode($arr[$idx]->get_link());
+          if($thumbnail=$arr[$idx]->get_thumbnail(0))
+            $urls[count($urls)] = htmlspecialchars_decode($thumbnail);
+          else
+            $urls[count($urls)] = htmlspecialchars_decode($arr[$idx]->get_link());
         }
         break;
     }
