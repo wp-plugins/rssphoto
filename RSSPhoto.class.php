@@ -26,8 +26,8 @@ class RSSPhoto
   var $error_msg      = "";
   var $id             = -1;
   var $show_desc      = false;
-  var $mime_types     = array('image/jpeg','image/jpg','image/gif','image/png');
-  var $mediums        = array('image');
+  var $mime_types     = array('image/jpeg','image/jpg','images/jpeg','image/gif','image/png');
+  var $medium_types   = array('image');
 
   /****************************
    * RSSPhoto temp vars
@@ -313,7 +313,7 @@ class RSSPhoto
             break;
           }
         }
-        foreach($this->mediums as $medium)
+        foreach($this->medium_types as $medium)
         {
           if(!strcmp($arr[$k]->get_medium(),$medium))
           {
@@ -443,10 +443,10 @@ class RSSPhoto
         $img_idxs = $this->select_indices($arr,$sel,$num);
         foreach($img_idxs as $idx)
         {
-          if($thumbnail=$arr[$idx]->get_thumbnail(0))
+          if(method_exists($arr[$idx],'get_thumbnail') && $thumbnail=$arr[$idx]->get_thumbnail(0))
             $urls[count($urls)] = htmlspecialchars_decode($thumbnail);
-          else
-            $urls[count($urls)] = htmlspecialchars_decode($arr[$idx]->get_link());
+          elseif(method_exists($arr[$idx],'get_link') && $lnk=$arr[$idx]->get_link())
+            $urls[count($urls)] = htmlspecialchars_decode($lnk);
         }
         break;
     }

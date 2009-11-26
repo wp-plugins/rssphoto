@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget, shortcode
 Requires at least: 2.8
 Tested up to: 2.8.6
-Stable tag: 0.6.6
+Stable tag: 0.6.7
 
 A customizable plugin to display photos from an RSS or Atom feed as a widget or shortcode.
 
@@ -134,9 +134,15 @@ RSS feeds can be implemented in numerous ways.  RSSPhoto attempts to intelligent
 
 == Changelog ==
 
+v0.6.7
+
+* Compatibility update for yet another different mime type that means "jpeg"
+
+
 v0.6.6
 
 * Stability update: works "out-of-the-box" with all the feeds I've encountered so far in troubleshooting, except where SimplePie settings need to be changed
+* Performance improvements: removed an http request from the critical path for thumbnail generation
 * When embedded images are small, RSSPhoto will now allow upscaled locally cached thumbnails (previously, images would not be displayed at all)
 * Added support for wordpress.com feeds
 
