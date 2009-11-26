@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget, shortcode
 Requires at least: 2.8
 Tested up to: 2.8.6
-Stable tag: 0.6.7
+Stable tag: 0.6.8
 
 A customizable plugin to display photos from an RSS or Atom feed as a widget or shortcode.
 
@@ -125,6 +125,10 @@ var $force_feed = true;
 
 RSS feeds can be implemented in numerous ways.  RSSPhoto attempts to intelligently find the pictures in an RSS feed, but sometimes you need to point it in the right direction.  In `RSSPhoto.class.php`, try changing the value of the variable `$rss_type_src` to one of the following values: 'Choose' (default), 'Description', 'Content', or 'Enclosures'.
 
+= How do I display the title for each image? =
+
+In `RSSPhoto.class.php`, set the variable `$show_title` to 1.  Note that this capability is still in beta, and there are some layout issues that may crop up when the title is displayed.  You can modify the CSS of the title (which is wrapped in a div just before the image) in `rssphoto.css` under the class `rssphoto_item_title`.
+
 
 == Screenshots ==
 
@@ -133,6 +137,12 @@ RSS feeds can be implemented in numerous ways.  RSSPhoto attempts to intelligent
 
 
 == Changelog ==
+
+v0.6.8
+
+* Various stability improvements
+* Added the (beta-version) capability to show image titles although the option has not been extended to the widget settings UI yet (see FAQ)
+
 
 v0.6.7
 

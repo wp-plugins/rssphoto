@@ -86,8 +86,6 @@ class RSSPhoto
         if($item != false)
         {
           // pull out image url, link
-          $item_title = $item->get_title();
-          $item_url = $item->get_link(0);
           if($this->feed->get_type() & SIMPLEPIE_TYPE_RSS_ALL)
           {
             switch($this->rss_type_src)
@@ -120,7 +118,7 @@ class RSSPhoto
             {
               $thumb_url = $this->create_thumbnail($url,$fixed,$size,$min_size);
               if($thumb_url!=false)
-                $this->add_image($thumb_url,$item_url,$item->get_description());
+                $this->add_image($thumb_url,$item->get_link(0),$item->get_description(),$item->get_title());
             }
           }
           else
@@ -292,41 +290,53 @@ class RSSPhoto
         break;
       }
 
+      // if it's an enclosure... anything else?
       if(is_object($arr[$k]))
       {
         // check for url 
-        $lnk=$arr[$k]->get_link(); // some bug that kills php if this isn't separated out
-        if(empty($lnk))
+        if(method_exists($arr[$k],'get_link'))
         {
-          unset($arr[$k]); 
-          break;
+          $lnk=$arr[$k]->get_link(); // some bug that kills php if this isn't separated out
+          if(empty($lnk))
+          {
+            unset($arr[$k]); 
+            break;
+          }
         }
        
         // check for compatible image type
-        $mime_flag=0;
-        $medium_flag=0;
-        foreach($this->mime_types as $mime)
+        if(method_exists($arr[$k],'get_type') || method_exists($arr[$k],'get_medium'))
         {
-          if(!strcmp($arr[$k]->get_type(),$mime))
+          $mime_flag=0;
+          $medium_flag=0;
+          if(method_exists($arr[$k],'get_type'))
           {
-            $mime_flag=1;
+            foreach($this->mime_types as $mime)
+            {
+              if(!strcmp($arr[$k]->get_type(),$mime))
+              {
+                $mime_flag=1;
+                break;
+              }
+            }
+          }
+          if(method_exists($arr[$k],'get_medium'))
+          {
+            foreach($this->medium_types as $medium)
+            {
+              if(!strcmp($arr[$k]->get_medium(),$medium))
+              {
+                $medium_flag=1;
+                break;
+              }
+            }
+          }
+          // if neither mime or medium, discard
+          if(!($mime_flag | $medium_flag))
+          {
+            unset($arr[$k]);
             break;
           }
-        }
-        foreach($this->medium_types as $medium)
-        {
-          if(!strcmp($arr[$k]->get_medium(),$medium))
-          {
-            $medium_flag=1;
-            break;
-          }
-        }
-
-        // if neither mime or medium, discard
-        if(!($mime_flag | $medium_flag))
-        {
-          unset($arr[$k]);
-          break;
         }
       }
     }
@@ -339,12 +349,16 @@ class RSSPhoto
   * Add image to array
   *
   */
-  function add_image($url,$link,$desc)
+  function add_image($url=false,$link="",$desc="",$title="")
   {
-    $idx=count($this->images);
-    $this->images[$idx]['url']=$url;
-    $this->images[$idx]['link']=$link;
-    $this->images[$idx]['desc']=$desc;
+    if($url!=false)
+    {
+      $idx=count($this->images);
+      $this->images[$idx]['url']=$url;
+      $this->images[$idx]['link']=$link;
+      $this->images[$idx]['desc']=$desc;
+      $this->images[$idx]['title']=$title;
+    }
   }
 
   function slideshow_html()
@@ -354,13 +368,19 @@ class RSSPhoto
     $active=0;
     foreach($this->images as $img)
     {
-      $html .= '<div';
+      $html .= '<div class="item ';
       if(!$active)
       {
-        $html .= ' class="active"'; 
+        $html .= 'active'; 
         $active=1;
       }
-      $html .= '><a href="'.$img['link'].'"><img src="'.$img['url'].'" alt="" /></a></div>';
+      $html .= '">';
+      if($this->show_title && !empty($img['title']))
+      {
+        $html .= '<div class="rssphoto_item_title">'.$img['title'].'</div>';
+      }
+      $html .= '<a href="'.$img['link'].'"><img src="'.$img['url'].'" alt="" /></a>';
+      $html .= '</div>';
       $html .= "\n";
     }
     $html .= '</div>';
@@ -380,7 +400,12 @@ class RSSPhoto
     $html = '<div class="rssphoto_static" id="rssphoto-'.$this->id.'">';
     foreach($this->images as $img)
     {
-      $html .= '<div><a href="'.$img['link'].'"><img src="'.$img['url'].'"></a></div>';
+      $html .= '<div>';
+      if($this->show_title && !empty($img['title']))
+      {
+        $html .= '<div class="rssphoto_item_title">'.$img['title'].'</div>';
+      }
+      $html .= '<a href="'.$img['link'].'"><img src="'.$img['url'].'"></a></div>';
       if($this->show_desc)
       {
         $html .= '<p>'.$img['desc'].'</p>';
