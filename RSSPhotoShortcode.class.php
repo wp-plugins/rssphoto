@@ -30,7 +30,10 @@ class RSSPhotoShortcode
   function shortcode_handler($atts=array(), $content=NULL) 
   {
     $this->setup($atts);
-    echo $this->rssphoto->html();
+    if($this->rssphoto->ready())
+      echo $this->rssphoto->html();
+    else
+      echo $this->rssphoto->get_error();
   }
 
   function setup($atts)

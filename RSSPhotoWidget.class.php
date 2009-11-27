@@ -57,10 +57,20 @@ class RSSPhotoWidget extends WP_Widget
     $this->setup($args,$instance);
 
     echo $this->before_widget;
-    echo $this->before_title;
-    echo apply_filters('widget_title', $this->rssphoto->title());
-    echo $this->after_title;
-    echo $this->rssphoto->html();
+
+    if($this->rssphoto->ready())
+    {
+      echo $this->before_title;
+      echo apply_filters('widget_title', $this->rssphoto->title());
+      echo $this->after_title;
+      echo $this->rssphoto->html();
+      echo $this->after_widget;
+    }
+    else
+    {
+      echo $this->rssphoto->get_error();
+    }
+
     echo $this->after_widget;
   }
 

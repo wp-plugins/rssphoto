@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget, shortcode
 Requires at least: 2.8
 Tested up to: 2.8.6
-Stable tag: 0.6.8
+Stable tag: 0.7
 
 A customizable plugin to display photos from an RSS or Atom feed as a widget or shortcode.
 
@@ -12,23 +12,24 @@ A customizable plugin to display photos from an RSS or Atom feed as a widget or 
 
 RSSPhoto is a Wordpress plugin to display photos from RSS and Atom feeds. It includes a widget for easy addition to a sidebar, or it can be configured by shortcode to display on any page.  Easy theme integration is also possible.  RSSPhoto includes jQuery-powered, cross-browser compatible slideshow as well as static image display.
 
-RSSPhoto requires the SimplePie Core Wordpress plugin to parse RSS and Atom feeds.  A cache directory, writable by the server, is required for thumbnail storage.  The GD library is required for generating thumbnails.  If the GD library is not present, the script will default to displaying images with the img width/height attributes forced to thumbnail size.
+RSSPhoto *no longer requires* the SimplePie Core Wordpress plugin to parse RSS and Atom feeds, and instead uses built-in Wordpress functions.  A cache directory, writable by the server, is required for thumbnail storage.  The GD library is required for generating thumbnails.  If the GD library is not present, the script will default to displaying images with the img width/height attributes forced to thumbnail size.
 
 
 == Installation ==
 
-Here are the basic installation instructions:
+RSSPhoto install simply requires creating a writable directory (default location wp-content/cache) to store thumbnails, and installing/activating the plugin itself:
 
-   1. Install the SimplePie Core plugin if it's not already installed ([Link](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin")).
-   2. If it doesn't already exist, create the directory `/wp-content/cache` and give it permissions of 755
-   3. Upload all files to the `/wp-content/plugins/` directory (consider creating an rssphoto subdirectory to hold the plugin files)
-   4. Activate the plugin through the 'Plugins' menu in Wordpress
+  1. If it doesn't already exist, create the directory `/wp-content/cache` and give it permissions of 755
+  2. Upload all files to the `/wp-content/plugins/` directory (consider creating an rssphoto subdirectory to hold the plugin files)
+  3. Activate the plugin through the 'Plugins' menu in Wordpress
 
 Probably the easiest way to accomplish step 1 is through an FTP program.  If you're interested, here's how to do it on the command line:
 
    1. cd {blog-dir}/wp-content
    2. mkdir cache
    3. chmod 755 cache
+
+Note that there are *some cases* which may require the SimplePie Core plugin.  For instance, if your feed does not correctly identify itself as an XML file, certain SimplePie settings must be changed which are not available through the built-in Wordpress SimplePie integration.  See the FAQ for more information.
 
 To use the widget:
 
@@ -57,9 +58,9 @@ To use the shortcode:
 To integrate with a theme:
 
    1. The plugin needs to be installed and activated.
-   2. Copy and paste the contents of the file RSSPhotoTheme.functions.php to the end of the file functions.php in your theme directory.
+   2. Copy and paste the contents of the file `RSSPhotoTheme.functions.php` to the end of the file `functions.php` in your theme directory.
    3. Declare RSSPhoto settings (multiple instances are supported).
-   4. Call the function display_rssphoto() from your theme (e.g., sidebar.php). An example of the last two steps:
+   4. Call the function `display_rssphoto()` from your theme (e.g., `sidebar.php`). An example of the last two steps:
 
       `<?php
       $settings[0]['title']='RSSPhoto';
@@ -91,35 +92,17 @@ Here's a quick description of the settings:
 
 == Frequently Asked Questions ==
 
-= How do I change the title, feed URL, or dimensions? =
+= How do I change the title, feed URL, or dimensions for a widget? =
 
 After your widget appears in the sidebar, go to the 'Widgets' section under the 'Appearance' menu in Wordpress and open the settings for the widget (click the down arrow in the widget titlebar and the form will appear).  Modify the fields as needed and click save.
-
-= I'm getting an error about the SimplePie class not being found.  What's wrong? =
-
-Here's what the error might look like:
-
-Fatal error: Class .SimplePie. not found in /home/username/public_html/wp-content/plugins/rssphoto/rssphoto.php on line 40
-
-If you receive this error, the most likely problem is that the SimplePie Core plugin is not installed or activated.  Here's a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin").
-
-= I can't seem to get thumbnails larger than X by Y pixels =
-
-Check to make sure the photos in your feed are larger than X by Y pixels - RSSPhoto uses the image actually embedded in the feed to generate locally cached thumbnails.
 
 = Is there a way to prevent very small images from being displayed? =
 
 Yes, you can set a variable to require a minimum size (in pixels) of either width or height.  In `RSSPhoto.class.php`, look for 
 
-  var $min_size = 10;
+`var $min_size = 10;`
 
 And change the value as needed (default is 10 pixels).
-
-= My feed doesn't display any photos; W3C Feed Validation says it's valid but has a warning about wrong media type =
-
-If you get a warning from the [W3C Feed Validation Service](http://validator.w3.org "W3C Feed Validation Service") about your feed being served with the wrong media type, and RSSPhoto doesn't display your images, it may be an issue where SimplePie refuses to parse the feed because of the incorrect media type.  Open `RSSPhoto.class.php` and set the `$force_feed` variable to `true`:
-
-var $force_feed = true;
 
 = My feed doesn't display any photos and there are no problems with the feed validation =
 
@@ -129,6 +112,34 @@ RSS feeds can be implemented in numerous ways.  RSSPhoto attempts to intelligent
 
 In `RSSPhoto.class.php`, set the variable `$show_title` to 1.  Note that this capability is still in beta, and there are some layout issues that may crop up when the title is displayed.  You can modify the CSS of the title (which is wrapped in a div just before the image) in `rssphoto.css` under the class `rssphoto_item_title`.
 
+= My feed doesn't display any photos; W3C Feed Validation says it's valid but has a warning about wrong media type =
+
+If you get a warning from the [W3C Feed Validation Service](http://validator.w3.org "W3C Feed Validation Service") about your feed being served with the wrong media type, and RSSPhoto doesn't display your images, you may need to install the SimplePie Core plugin and force RSSPhoto to use it.  The integrated SimplePie refuses to parse the feed because of the incorrect media type.  Follow the FAQ point below to enable SimplePie Core.  Then, open `RSSPhoto.class.php` and set the `$force_feed` variable to `true`:
+
+`var $force_feed = true;`
+
+= How do I force RSSPhoto to use the SimplePie Core plugin so I have access to more feed-level options for troubleshooting? =
+
+To be clear, this option is available for fringe cases and is not expected to be commonly used (hence getting down and dirty with the code).  An example is where the XML feed does not set its headers correctly and the SimplePie "force_feed" option must be set.
+
+First, de-activate RSSPhoto.  Next, install and activate the SimplePie Core plugin (*not* the full SimplePie plugin).  Here's a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin").
+
+Now, edit `RSSPhoto.class.php` and change the value of the variable `$parser` from 'built-in' to 'simplepie-core':
+
+`var $parser = 'simplepie-core';`
+
+Re-activate RSSPhoto.  That's it!
+
+= I'm getting an error about the SimplePie class not being found.  What's wrong? =
+
+This should *only* happen if you have followed the directions above to force RSSPhoto to use the SimplePie Core plugin.  
+
+Here's what the error might look like:
+
+Fatal error: Class .SimplePie. not found in /home/username/public_html/wp-content/plugins/rssphoto/rssphoto.php on line 40
+
+If you receive this error, the most likely problem is that the SimplePie Core plugin is not installed or activated.  Here's a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin").
+
 
 == Screenshots ==
 
@@ -137,6 +148,12 @@ In `RSSPhoto.class.php`, set the variable `$show_title` to 1.  Note that this ca
 
 
 == Changelog ==
+
+v0.7
+
+* RSSPhoto *no longer requires* the SimplePie Core plugin! (but support for using SimplePie Core plugin is preserved).  Instead, the Wordpress built-in `fetch_feed` function is used.
+* Improved error messages and feedback
+
 
 v0.6.8
 
