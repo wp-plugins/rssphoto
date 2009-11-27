@@ -64,7 +64,6 @@ class RSSPhotoWidget extends WP_Widget
       echo apply_filters('widget_title', $this->rssphoto->title());
       echo $this->after_title;
       echo $this->rssphoto->html();
-      echo $this->after_widget;
     }
     else
     {

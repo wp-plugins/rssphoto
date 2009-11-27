@@ -74,13 +74,6 @@ class RSSPhoto
    */
   function init()
   {
-    // check for thumbnail cache directory
-    if(!file_exists($this->cache_location))
-    {
-      $this->set_error("The thumbnail cache specified as ".$this->cache_location." does not exist");
-      return;
-    }
-
     $this->id = rand();
 
     // set up the SimplePie feed

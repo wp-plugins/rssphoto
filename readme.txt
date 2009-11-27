@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget, shortcode
 Requires at least: 2.8
 Tested up to: 2.8.6
-Stable tag: 0.7
+Stable tag: 0.7.1
 
 A customizable plugin to display photos from an RSS or Atom feed as a widget or shortcode.
 
@@ -148,6 +148,11 @@ If you receive this error, the most likely problem is that the SimplePie Core pl
 
 
 == Changelog ==
+
+v0.7.1
+
+* Bug fix: extra HTML tags which distorted the sidebar layout
+* Bug fix: removed check for thumbnail cache directory which caused problems in some installs
 
 v0.7
 
