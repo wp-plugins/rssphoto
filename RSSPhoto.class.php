@@ -22,14 +22,16 @@ class RSSPhoto
   /****************************
    * Internal variables
    ****************************/
-  var $images         = array();
-  var $error_msg      = "";
-  var $id             = -1;
-  var $show_desc      = false;
-  var $mime_types     = array('image/jpeg','image/jpg','images/jpeg','image/gif','image/png');
-  var $medium_types   = array('image');
-  var $parser         = 'built-in';
-  var $status         = 0; // -1 for error, 0 for uninitialized, 1 for initialized
+  var $version        = '0.8'; // current version of RSSPhoto
+  var $images         = array(); // will store images to display
+  var $error_msg      = ""; // most recent error message
+  var $debug_msgs     = array(); // array of debug messages: see print_debug()
+  var $id             = -1; // random id to allow multiple instantiations
+  var $mime_types     = array('image/jpeg','image/jpg','images/jpeg','image/gif','image/png'); // mime types allowed
+  var $medium_types   = array('image'); // medium types allowed (for enclosures in RSS feeds)
+  var $parser         = 'built-in'; // which parser to use for interpreting feeds: 'built-in' or 'simplepie-core'
+  var $status         = 0; // -1 for error, 0 for uninitialized, 1 for initialized: see ready()
+  var $div_height     = -1; // height of the RSSPhoto div, based on max thumbnail height encountered
 
   /****************************
    * RSSPhoto temp vars
@@ -39,18 +41,19 @@ class RSSPhoto
   /****************************
    * RSSPhoto settings
    ****************************/
-  var $title          = 'RSSPhoto';
-  var $url            = 'http://photography.spencerkellis.net/atom.php';
-  var $fixed          = 'Max';
-  var $size           = 150;
-  var $img_sel        = 'Most Recent';
-  var $num_img        = 1;
-  var $min_size       = 10;
-  var $item_sel       = 'Random';
-  var $num_item       = 1;
-  var $show_title     = 0;
-  var $output         = 'Slideshow';
-  var $interval       = 6000;
+  var $title          = 'RSSPhoto'; // title shown above the widget
+  var $url            = 'http://photography.spencerkellis.net/atom.php'; // url of feed to parse
+  var $width          = 100; // [W] in px or 'variable' (only one may have the value 'variable')
+  var $height         = 180; // [H] in px or 'variable' (only one may have the value 'variable')
+  var $img_sel        = 'Most Recent'; // method of selecting images from feed items.  'Most Recent' or 'Random'
+  var $num_img        = 1; // how many images to pull out per feed item
+  var $min_size       = 10; // minimum size of image (discarded if less)
+  var $max_size       = 500; // thumbnail will shrink to this hard limit in either dimension
+  var $item_sel       = 'Random'; // method of selecting feed items.  'Most Recent' or 'Random'
+  var $num_item       = 1; // number of feed items (i.e., articles) to pull out of the feed
+  var $show_title     = 0; // whether to show titles for each image
+  var $output         = 'Slideshow'; // output style: 'Slideshow' or 'Static'
+  var $interval       = 6000; // interval in milliseconds between image transitions
 
   /****************************
    * SimplePie settings
@@ -81,12 +84,14 @@ class RSSPhoto
 
     if(empty($this->feed))
     {
+      $this->add_debug_msg('Dying in function init() because $this->feed is empty');
       $this->ignominious_death();
       return;
     }
 
     if(is_wp_error($this->feed))
     {
+      $this->add_debug_msg('Dying in function init() because $this->feed is a Wordpress WP_Error object');
       $this->set_error($this->feed->get_error_message());
       $this->ignominious_death();
       return;
@@ -108,27 +113,38 @@ class RSSPhoto
           // pull out image url, link
           if($this->feed->get_type() & SIMPLEPIE_TYPE_RSS_ALL)
           {
+            $this->add_debug_msg('Feed is of type RSS');
             switch($this->rss_type_src)
             {
               case 'Enclosures':
+                $this->add_debug_msg('Forced to look in enclosures for images');
                 $image_url = $this->get_img_urls($enclosures,$this->img_sel,$this->num_img,'Enclosures');
                 break;
               case 'Description':
+                $this->add_debug_msg('Forced to look in description for images');
                 $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Description');
                 break;
               case 'Content':
+                $this->add_debug_msg('Forced to look in content for images');
                 $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Content');
                 break;
               case 'Choose':
                 if($enclosures = $item->get_enclosures())
+                {
+                  $this->add_debug_msg('There are enclosures in the feed; looking for images in the enclosures');
                   $image_url = $this->get_img_urls($enclosures,$this->img_sel,$this->num_img,'Enclosures');
+                }
                 else
+                {
+                  $this->add_debug_msg('There are no enclosures in the feed; looking for images in the description');
                   $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Description');
+                }
                 break;
             }
           }
           elseif ($this->feed->get_type() & SIMPLEPIE_TYPE_ATOM_ALL)
           {
+            $this->add_debug_msg('Feed is of type Atom; looking for images in content');
             $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Content');
           }
 
@@ -136,13 +152,20 @@ class RSSPhoto
           {
             foreach($image_url as $url)
             {
-              $thumb_url = $this->create_thumbnail($url,$fixed,$size,$min_size);
+              $this->add_debug_msg("Evaluating $url");
+              $thumb_url = $this->create_thumbnail($url);
               if($thumb_url!=false)
+              {
+                $this->add_debug_msg("Adding locally stored file $thumb_url");
                 $this->add_image($thumb_url,$item->get_link(0),$item->get_description(),$item->get_title());
+              }
+              else
+                $this->add_debug_msg("Failed to add image at $image_url because create_thumbnail() returned false");
             }
           }
           else
           {
+            $this->add_debug_msg('Dying in function init() because $image_url is not an array');
             $this->set_error('Bad image urls');
             $this->ignominious_death();
             return;
@@ -155,14 +178,15 @@ class RSSPhoto
           else
             $this->set_error("Tried to load item #$item_idx from $url and couldn't!");
 
+          $this->add_debug_msg('Died in function init() because a feed item was false');
           $this->ignominious_death();
           return;
         }
       }
     }
 
-    // read to display
-    $this->status=1;
+    $this->status = $this->check_thumbnails();
+    //$this->print_debug();
   }
 
   /**
@@ -173,6 +197,7 @@ class RSSPhoto
     switch($parser)
     {
       case 'simplepie-core':
+        $this->add_debug_msg('Using SimplePie Core plugin to parse feeds');
         if(class_exists('SimplePie'))
         {
           $this->feed = new SimplePie();
@@ -186,6 +211,7 @@ class RSSPhoto
         break;
       case 'built-in':
       default:
+        $this->add_debug_msg('Using built-in Wordpress functions to parse feeds');
         if(function_exists('fetch_feed'))
         {
           $this->feed = fetch_feed($url);
@@ -218,100 +244,193 @@ class RSSPhoto
   */
   function create_thumbnail($image_url)
   {
-    $image_filename = "rssphoto-".md5($image_url)."-{$this->fixed}-{$this->size}.jpg";
+    if(!function_exists('imagecreatefromjpeg'))
+    {
+      $this->add_debug_msg('GD Library doesn\'t exist, so thumbnails won\'t be created: returning false from function create_thumbnail()');
+      return false;
+    }
+
+    $image_filename = "rssphoto-".md5($image_url)."-{$this->width}x{$this->height}.jpg";
     $thumb_path = $this->cache_location."/".$image_filename;
     $thumb_url = get_bloginfo('wpurl')."/$thumb_path";
     if(!file_exists($thumb_path))
     {
-      // attempt to get image dimensions using getimagesize
-      list($width, $height, $type, $attr) = @getimagesize($image_url);
-      
-      // if that doesn't work, check for GD and use imagesx/imagesy
-      if($height==false || $width==false)
+      $imginfo = @getimagesize($image_url);
+      if(!$imginfo)
       {
-        if($type==1 && function_exists('imagecreatefromgif'))
-          $image = @imagecreatefromgif($image_url);
-        if($type==2 && function_exists('imagecreatefromjpeg'))
-          $image = @imagecreatefromjpeg($image_url);
-        elseif($type==3 && function_exists('imagecreatefrompng'))
-          $image = @imagecreatefrompng($image_url);
-
-        if($image==false)
-          return false;
-        else
-        {
-          $height = @imagesy($image);
-          $width = @imagesx($image);
-        }
-      }
-     
-      if($height<=$this->min_size || $width<=$this->min_size)
+        $this->add_debug_msg("Failed to open image at $image_url using getimagesize: returning false from function create_thumbnail()");
         return false;
+      }
+
+      $width = $imginfo[0];
+      $height = $imginfo[1];
+
+      switch($imginfo[2])
+      {
+        case IMAGETYPE_GIF:  $image = @imagecreatefromgif($image_url);  break;
+        case IMAGETYPE_JPEG: $image = @imagecreatefromjpeg($image_url); break;
+        case IMAGETYPE_PNG:  $image = @imagecreatefrompng($image_url);  break;
+      }
+
+      if($image==false)
+      {
+        $this->add_debug_msg("Failed to open image at $image_url with imagecreatefromXXX: returning false from function create_thumbnail()");
+        return false;
+      }
+
+      if($height<=$this->min_size || $width<=$this->min_size)
+      {
+        $this->add_debug_msg("Height or width are below the minimum size (which is ".$this->min_size."px): returning false from function create_thumbnail()");
+        return false;
+      }
       
       // if we've got valid image dimensions, continue
       if($height!=false && $width!=false)
       {
-        // default parameters
-        switch($this->fixed)
+        // aspect ratio of original image
+        $old_ratio = $width/$height;
+
+        // determine thumbnail dimensions from settings
+        if(!strcmp($this->width,'variable') && !strcmp($this->height,'variable'))
         {
-          case 'Width':
-            $ratio = $this->size/$width;
-            $thumb_width = $this->size;
-            $thumb_height = $height * $ratio;
-            break;
-          case 'Height':
-            $ratio = $this->size/$height;
-            $thumb_height = $this->size;
-            $thumb_width = $width * $ratio;
-            break;
-          case 'Max':
-          default:
-            $ratio = $this->size/max($height,$width);
-            if($width>$height)
-            {
-              $thumb_width = $this->size;
-              $thumb_height = $height * $ratio;
-            }
-            else
-            {
-              $thumb_height = $this->size;
-              $thumb_width = $width * $ratio;
-            }
-            break;
+          $thumb_width = $width;
+          $thumb_height = $height;
         }
-     
-        // use GD library to create cached thumbnail if necessary
-        if(function_exists('imagecreatefromjpeg'))
+        elseif(!strcmp($this->width,'variable')) // variable width: hold orig aspect ratio
         {
-          // create thumbnail
-          if($image == false)
+          $thumb_width = floor($old_ratio*$this->height);
+          $thumb_height = $this->height;
+        }
+        elseif(!strcmp($this->height,'variable')) // variable height: hold orig aspect ratio
+        {
+          $thumb_width = $this->width;
+          $thumb_height = floor($this->width/$old_ratio);
+        }
+        else // fixed new dimensions
+        {
+          $thumb_width = $this->width;
+          $thumb_height = $this->height;
+        }
+
+        // hard limit to $this->max_size
+        if($thumb_width>$this->max_size)
+        {
+          $ratio = $this->max_size/$thumb_width;
+          $thumb_width = $this->max_size;
+          $thumb_height = $thumb_height*$ratio;
+        }
+        else if($thumb_height>$this->max_size)
+        {
+          $ratio = $this->max_size/$thumb_height;
+          $thumb_height = $this->max_size;
+          $thumb_width = $thumb_width*$ratio;
+        }
+
+        // determine aspect ratio of thumbnail
+        $new_ratio = $thumb_width/$thumb_height;
+
+        // dimensions of original image that crop to aspect ratio of thumbnail
+        if($new_ratio>1 && $old_ratio>1) // both wide
+        {
+          if($new_ratio>$old_ratio) // new is wider
           {
-            if($type==1 && function_exists('imagecreatefromgif'))
-              $image = @imagecreatefromgif($image_url);
-            if($type==2 && function_exists('imagecreatefromjpeg'))
-              $image = @imagecreatefromjpeg($image_url);
-            elseif($type==3 && function_exists('imagecreatefrompng'))
-              $image = @imagecreatefrompng($image_url);
+            $crop_height = floor($width / $new_ratio);
+            $crop_width  = $width;
           }
-     
-          if($image != false)
+          else // old is wider
           {
-            $quality = 85;
-            $thumb=imagecreatetruecolor($thumb_width,$thumb_height);
-            @imagecopyresampled($thumb,$image,0,0,0,0,$thumb_width,$thumb_height,$width,$height);
-            @imagejpeg($thumb,$thumb_path,$quality);
+            $crop_height = $height;
+            $crop_width  = floor($height * $new_ratio);
           }
         }
-        else
+        elseif($new_ratio<1 && $old_ratio>1) // old wide, new tall
         {
-          $this->set_error("GD Library doesn't exist, so thumbnails won't be created");
+          $crop_height = $height;
+          $crop_width  = floor($height * $new_ratio);
+        }
+        elseif($new_ratio>1 && $old_ratio<1) // old tall, new wide
+        {
+          $crop_height = floor($width / $new_ratio);
+          $crop_width  = $width;
+        }
+        elseif($new_ratio<1 && $old_ratio<1) // both tall
+        {
+          if($new_ratio>$old_ratio) // old is taller
+          {
+            $crop_height = floor($width / $new_ratio);
+            $crop_width  = $width;
+          }
+          else // new is taller
+          {
+            $crop_height = $height;
+            $crop_width  = floor($height * $new_ratio);
+          }
+        }
+        else // no cropping needed: same aspect ratio
+        {
+          $crop_height = $height;
+          $crop_width  = $width;
+        }
+        $crop_left = floor(($width/2) - ($crop_width/2));
+        $crop_top = floor(($height/2) - ($crop_height/2));
+
+        $this->add_debug_msg("Evaluated thumbnail: orig {$height}x{$width}; crop {$crop_height}x{$crop_width}; thumb {$thumb_height}x{$thumb_width}");
+     
+        if($image != false)
+        {
+          $quality = 85;
+          $thumb=imagecreatetruecolor($thumb_width,$thumb_height);
+          @imagecopyresampled($thumb,$image,0,0,$crop_left,$crop_top,$thumb_width,$thumb_height,$crop_width,$crop_height);
+          @imagejpeg($thumb,$thumb_path,$quality);
         }
       } // if($height!=false && width!=false)
+      else
+      {
+        $this->add_debug_msg("Height or width or both were false: {$height}x{$width}");
+      }
     } // if(!file_exists($thumb_path))
+    else
+    {
+      $this->add_debug_msg("Thumbnail has already been cached: $thumb_path");
+    }
 
     return $thumb_url;
 
   } // function create_thumbnail
+
+  /**
+   *  Check to make sure thumbnails exist; update height
+   */
+  function check_thumbnails()
+  {
+    for($k=count($this->images)-1; $k>=0; $k--)
+    {
+      $imginfo=getimagesize($this->images[$k]['url']);
+
+      if(!$imginfo)
+      {
+        $this->add_debug_msg("In check_thumbnails(), unsetting index $k of images because getimagesize returned false");
+        unset($this->images[$k]);
+      }
+      else
+      {
+        if($imginfo[1] > $this->div_height)
+          $this->div_height = $imginfo[1];
+      }
+    }
+
+    // read to display
+    if(count($this->images)>0)
+    {
+      $this->add_debug_msg("In function check_thumbnails(), there are ".count($this->images)." images in ".'$this->images'."; setting status to 1");
+      return 1;
+    }
+    else
+    {
+      $this->add_debug_msg('In function check_thumbnails(), there are no images in $this->images; setting status to -1');
+      return -1;
+    }
+  }
 
   /**
   *  Get indices of images from array
@@ -424,7 +543,7 @@ class RSSPhoto
    */
   function slideshow_html()
   {
-    $html = '<div class="rssphoto_slideshow" id="rssphoto-'.$this->id.'" style="height:'.$this->size.'px;">';
+    $html = '<div class="rssphoto_slideshow" id="rssphoto-'.$this->id.'" style="height:'.$this->div_height.'px;">';
 
     $active=0;
     foreach($this->images as $img)
@@ -500,8 +619,8 @@ class RSSPhoto
   {
     if(!empty($settings['rssphoto_title']))      $this->title      = $settings['rssphoto_title'];
     if(!empty($settings['rssphoto_url']))        $this->url        = $settings['rssphoto_url'];
-    if(!empty($settings['rssphoto_fixed']))      $this->fixed      = $settings['rssphoto_fixed'];
-    if(!empty($settings['rssphoto_size']))       $this->size       = $settings['rssphoto_size'];
+    if(!empty($settings['rssphoto_height']))     $this->height     = $settings['rssphoto_height'];
+    if(!empty($settings['rssphoto_width']))      $this->width      = $settings['rssphoto_width'];
     if(!empty($settings['rssphoto_img_sel']))    $this->img_sel    = $settings['rssphoto_img_sel'];
     if(!empty($settings['rssphoto_num_img']))    $this->num_img    = $settings['rssphoto_num_img'];
     if(!empty($settings['rssphoto_item_sel']))   $this->item_sel   = $settings['rssphoto_item_sel'];
@@ -584,5 +703,25 @@ class RSSPhoto
       $this->set_error('RSSPhoto died an unknown but ignominious death');
 
     $this->status = -1;
+  }
+
+  /**
+   *  Track debug messages
+   */
+  function add_debug_msg($msg="",$file=false,$line=false)
+  {
+    $this->debug_msgs[]=$msg.($file?" [in file $file]":"").($line?" [on line $line]":"");;
+  }
+
+  function print_debug()
+  {
+    print "<ul>\n";
+    for($k=0; $k<count($this->debug_msgs); $k++)
+    {
+      print "<li>";
+      print $this->debug_msgs[$k];
+      print "</li>";
+    }
+    print "</ul>\n";
   }
 }
