@@ -163,10 +163,16 @@ By default, the debug output is hidden in HTML comments (&lt;!-- and --&gt;), so
 
 == Changelog ==
 
+v0.8.2
+
+* Bug fix to avoid using absolute paths when saving thumbnails to the cache directory
+
+
 v0.8.1
 
 * Improved display of Slideshow v2 in IE; known issue with opacity but there are no black or white bars any more
 * Fixed a layout glitch to clear after the RSSPhoto div so elements below will align properly
+
 
 v0.8
 

@@ -22,8 +22,8 @@ class RSSPhoto
   /****************************
    * Internal variables
    ****************************/
-  var $version        = '0.8'; // current version of RSSPhoto
-  var $debug          = 0; // '0' for normal; '1' to print debug comments (hidden by default by <!-- and --> tags)
+  var $version        = '0.8.2'; // current version of RSSPhoto
+  var $debug          = 1; // '0' for normal; '1' to print debug comments (hidden by default by <!-- and --> tags)
   var $images         = array(); // will store images to display
   var $error_msg      = ""; // most recent error message
   var $debug_msgs     = array(); // array of debug messages: see print_debug()
@@ -34,6 +34,7 @@ class RSSPhoto
   var $status         = 0; // -1 for error, 0 for uninitialized, 1 for initialized: see ready()
   var $div_height     = -1; // height of the RSSPhoto div, based on max thumbnail height encountered
   var $div_width      = -1; // height of the RSSPhoto div, based on max thumbnail height encountered
+  var $cache_dir      = 'wp-content/cache'; // assumed to exist in [WORDPRESS_DIR]/wp-content/
 
   /****************************
    * RSSPhoto temp vars
@@ -63,7 +64,6 @@ class RSSPhoto
    ****************************/
 
   var $feed;
-  var $cache_dir      = 'cache'; 
   var $force_feed     = false;
 
   /*************************
@@ -114,9 +114,15 @@ class RSSPhoto
       return false;
     }
 
+    $rel_wp_path = str_replace(get_bloginfo('url'),"",get_bloginfo('wpurl'));
     $image_filename = "rssphoto-".md5($image_url)."-{$this->width}x{$this->height}.jpg";
-    $thumb_path = WP_CONTENT_DIR . "/" . $this->cache_dir . "/" . $image_filename;
-    $thumb_url = get_bloginfo('wpurl')."/wp-content/". $this->cache_dir ."/$image_filename";
+    $thumb_path = $rel_wp_path . "/" . $this->cache_dir . "/" . $image_filename;
+    $thumb_path = substr($thumb_path,1);
+    $thumb_url = get_bloginfo('wpurl')."/". $this->cache_dir ."/$image_filename";
+    $this->add_debug("Relative wordpress path found to be $rel_wp_path");
+    $this->add_debug("Set thumbnail path to $thumb_path");
+    $this->add_debug("Set thumbnail URL to $thumb_url");
+
     if(!file_exists($thumb_path))
     {
       $imginfo = @getimagesize($image_url);
