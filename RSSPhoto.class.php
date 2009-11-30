@@ -656,6 +656,18 @@ class RSSPhoto
     }
   }
 
+  /*
+   * Error handler to add debug messages
+   */
+  function RSSPhotoErrorHandler($errno, $errstr, $errfile, $errline)
+  {
+    $this->add_debug("PHP ERROR [$errno] $errstr [in $errfile on line $errline]");
+
+    // don't execute PHP Error Handler
+    return true;
+  }
+
+
   /*********************************
    *  Publically exposed functions
    *********************************/
@@ -718,6 +730,9 @@ class RSSPhoto
    */
   function init()
   {
+    // we want to capture any errors
+    $old_error_handler = set_error_handler(array($this, "RSSPhotoErrorHandler"),E_WARNING|E_USER_ERROR|E_USER_WARNING);
+
     $this->id = rand();
 
     // set up the SimplePie feed
@@ -830,6 +845,9 @@ class RSSPhoto
 
     if($this->debug)
       $this->print_debug();
+
+    // return control to whatever it was previously
+    set_error_handler($old_error_handler);
   }
 
   /**
