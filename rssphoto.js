@@ -15,6 +15,57 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/*
+ * Setup necessary bindings for Slideshow 2
+ */
+function setupSlideshow2(id,interval)
+{
+  setInterval( "slideSwitch2("+id+")", interval );
+  jQuery("div.rssphoto_slideshow2")
+    .mouseenter(titleOverlayMouseEnter)
+    .mouseleave(titleOverlayMouseLeave);
+}
+
+/*
+ * Transition images for Slideshow 2
+ */
+function slideSwitch2(id) 
+{
+  var $active = jQuery(".rssphoto_slideshow2#rssphoto-"+id+" div.active");
+  if ( $active.length == 0 )
+    $active = jQuery(".rssphoto_slideshow2#rssphoto-"+id+" div:last");
+
+  var $next = $active.next().length ? $active.next() : jQuery(".rssphoto_slideshow2#rssphoto-"+id+" div:first");
+
+  $active.addClass('last-active')
+    .animate({opacity : 0.0}, 1000);
+
+  $next.css({opacity: 0.0})
+    .addClass('active')
+    .animate({opacity: 1.0}, 1000, function() {
+      $active.removeClass('active last-active');
+    });
+}
+
+/*
+ * Mouseenter code for Slideshow2 and show title
+ */
+function titleOverlayMouseEnter()
+{
+  jQuery("div.title_overlay").animate({opacity: 0.7}, 400, function(){});
+}
+
+/*
+ * Mouseleave code for Slideshow2 and show title
+ */
+function titleOverlayMouseLeave()
+{
+  jQuery("div.title_overlay").animate({opacity: 0.0}, 400, function(){});
+}
+
+/*
+ * Transition images for Slideshow 1
+ */
 function slideSwitch(id) 
 {
   var $active = jQuery(".rssphoto_slideshow#rssphoto-"+id+" div.active");
@@ -33,6 +84,9 @@ function slideSwitch(id)
     });
 }
 
+/*
+ * Show images for static display
+ */
 function expandStatic(id)
 {
   jQuery(".rssphoto_static#rssphoto-"+id+" div").animate({opacity: 1.0}, 1000, function() {});

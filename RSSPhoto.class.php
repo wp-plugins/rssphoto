@@ -32,6 +32,7 @@ class RSSPhoto
   var $parser         = 'built-in'; // which parser to use for interpreting feeds: 'built-in' or 'simplepie-core'
   var $status         = 0; // -1 for error, 0 for uninitialized, 1 for initialized: see ready()
   var $div_height     = -1; // height of the RSSPhoto div, based on max thumbnail height encountered
+  var $div_width      = -1; // height of the RSSPhoto div, based on max thumbnail height encountered
 
   /****************************
    * RSSPhoto temp vars
@@ -51,8 +52,8 @@ class RSSPhoto
   var $max_size       = 500; // thumbnail will shrink to this hard limit in either dimension
   var $item_sel       = 'Random'; // method of selecting feed items.  'Most Recent' or 'Random'
   var $num_item       = 1; // number of feed items (i.e., articles) to pull out of the feed
-  var $show_title     = 0; // whether to show titles for each image
-  var $output         = 'Slideshow'; // output style: 'Slideshow' or 'Static'
+  var $show_title     = 1; // whether to show titles for each image
+  var $output         = 'Slideshow2'; // output style: 'Slideshow2' or 'Slideshow' or 'Static'
   var $interval       = 6000; // interval in milliseconds between image transitions
 
   /****************************
@@ -62,142 +63,19 @@ class RSSPhoto
   var $cache_location = 'wp-content/cache';
   var $force_feed     = false;
 
+  /*************************
+   * Private Functions
+   *************************/
+
   /**
-   *  Constructor.  
-   *  Call with array of settings where keys are the setting names, values are the settings.
+   *  Chooser function to use either the SimplePie Core or built-in feed parser
    */
-  function RSSPhoto($settings=array())
-  {
-    $this->update($settings);
-  }
-
-  /**
-   *  Initialize RSSPhoto.  
-   *  Call after construction (and settings established), before display (e.g., before calling html()).
-   */
-  function init()
-  {
-    $this->id = rand();
-
-    // set up the SimplePie feed
-    $this->init_feed($this->url,$this->parser,$this->cache_location,$this->force_feed);
-
-    if(empty($this->feed))
-    {
-      $this->add_debug_msg('Dying in function init() because $this->feed is empty');
-      $this->ignominious_death();
-      return;
-    }
-
-    if(is_wp_error($this->feed))
-    {
-      $this->add_debug_msg('Dying in function init() because $this->feed is a Wordpress WP_Error object');
-      $this->set_error($this->feed->get_error_message());
-      $this->ignominious_death();
-      return;
-    }
-
-    // get images, generate thumbnails, etc.
-    // consider limiting this to some reasonable number for feeds that have >100s of items?
-    if($this->feed->get_item_quantity() > 0)
-    {
-      $item_idxs = $this->select_indices($this->feed->get_items(),$this->item_sel,$this->num_item);
-
-      // choose feed item(s)
-      foreach($item_idxs as $item_idx)
-      {
-        $item = $this->feed->get_item($item_idx);
-
-        if($item != false)
-        {
-          // pull out image url, link
-          if($this->feed->get_type() & SIMPLEPIE_TYPE_RSS_ALL)
-          {
-            $this->add_debug_msg('Feed is of type RSS');
-            switch($this->rss_type_src)
-            {
-              case 'Enclosures':
-                $this->add_debug_msg('Forced to look in enclosures for images');
-                $image_url = $this->get_img_urls($enclosures,$this->img_sel,$this->num_img,'Enclosures');
-                break;
-              case 'Description':
-                $this->add_debug_msg('Forced to look in description for images');
-                $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Description');
-                break;
-              case 'Content':
-                $this->add_debug_msg('Forced to look in content for images');
-                $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Content');
-                break;
-              case 'Choose':
-                if($enclosures = $item->get_enclosures())
-                {
-                  $this->add_debug_msg('There are enclosures in the feed; looking for images in the enclosures');
-                  $image_url = $this->get_img_urls($enclosures,$this->img_sel,$this->num_img,'Enclosures');
-                }
-                else
-                {
-                  $this->add_debug_msg('There are no enclosures in the feed; looking for images in the description');
-                  $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Description');
-                }
-                break;
-            }
-          }
-          elseif ($this->feed->get_type() & SIMPLEPIE_TYPE_ATOM_ALL)
-          {
-            $this->add_debug_msg('Feed is of type Atom; looking for images in content');
-            $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Content');
-          }
-
-          if(is_array($image_url))
-          {
-            foreach($image_url as $url)
-            {
-              $this->add_debug_msg("Evaluating $url");
-              $thumb_url = $this->create_thumbnail($url);
-              if($thumb_url!=false)
-              {
-                $this->add_debug_msg("Adding locally stored file $thumb_url");
-                $this->add_image($thumb_url,$item->get_link(0),$item->get_description(),$item->get_title());
-              }
-              else
-                $this->add_debug_msg("Failed to add image at $image_url because create_thumbnail() returned false");
-            }
-          }
-          else
-          {
-            $this->add_debug_msg('Dying in function init() because $image_url is not an array');
-            $this->set_error('Bad image urls');
-            $this->ignominious_death();
-            return;
-          }
-        }
-        else // item==false
-        {
-          if($this->feed->error())
-            $this->set_error($this->feed->error());
-          else
-            $this->set_error("Tried to load item #$item_idx from $url and couldn't!");
-
-          $this->add_debug_msg('Died in function init() because a feed item was false');
-          $this->ignominious_death();
-          return;
-        }
-      }
-    }
-
-    $this->status = $this->check_thumbnails();
-    //$this->print_debug();
-  }
-
-  /**
-  *  Chooser function to use either the SimplePie Core or built-in feed parser
-  */
   function init_feed($url='http://www.spencerkellis.net/atom.php',$parser='built-in',$cacheloc='',$forcefeed=false)
   {
     switch($parser)
     {
       case 'simplepie-core':
-        $this->add_debug_msg('Using SimplePie Core plugin to parse feeds');
+        $this->add_debug('Using SimplePie Core plugin to parse feeds');
         if(class_exists('SimplePie'))
         {
           $this->feed = new SimplePie();
@@ -211,7 +89,7 @@ class RSSPhoto
         break;
       case 'built-in':
       default:
-        $this->add_debug_msg('Using built-in Wordpress functions to parse feeds');
+        $this->add_debug('Using built-in Wordpress functions to parse feeds');
         if(function_exists('fetch_feed'))
         {
           $this->feed = fetch_feed($url);
@@ -223,30 +101,13 @@ class RSSPhoto
   }
 
   /**
-  *  Chooser function drill down to either the slideshow or static thumbnail display
-  */
-  function html()
-  {
-    switch($this->output)
-    {
-      case 'Slideshow':
-        return $this->slideshow_html();
-        break;
-      case 'Static':
-      default:
-        return $this->static_html();
-        break;
-    }
-  }
-
-  /**
-  *  Create thumbnails of a given image url in the local cache
-  */
+   *  Create thumbnails of a given image url in the local cache
+   */
   function create_thumbnail($image_url)
   {
     if(!function_exists('imagecreatefromjpeg'))
     {
-      $this->add_debug_msg('GD Library doesn\'t exist, so thumbnails won\'t be created: returning false from function create_thumbnail()');
+      $this->add_debug('GD Library doesn\'t exist, so thumbnails won\'t be created: returning false from function create_thumbnail()');
       return false;
     }
 
@@ -258,7 +119,7 @@ class RSSPhoto
       $imginfo = @getimagesize($image_url);
       if(!$imginfo)
       {
-        $this->add_debug_msg("Failed to open image at $image_url using getimagesize: returning false from function create_thumbnail()");
+        $this->add_debug("Failed to open image at $image_url using getimagesize: returning false from function create_thumbnail()");
         return false;
       }
 
@@ -274,13 +135,13 @@ class RSSPhoto
 
       if($image==false)
       {
-        $this->add_debug_msg("Failed to open image at $image_url with imagecreatefromXXX: returning false from function create_thumbnail()");
+        $this->add_debug("Failed to open image at $image_url with imagecreatefromXXX: returning false from function create_thumbnail()");
         return false;
       }
 
       if($height<=$this->min_size || $width<=$this->min_size)
       {
-        $this->add_debug_msg("Height or width are below the minimum size (which is ".$this->min_size."px): returning false from function create_thumbnail()");
+        $this->add_debug("Height or width are below the minimum size (which is ".$this->min_size."px): returning false from function create_thumbnail()");
         return false;
       }
       
@@ -325,6 +186,10 @@ class RSSPhoto
           $thumb_height = $this->max_size;
           $thumb_width = $thumb_width*$ratio;
         }
+
+        // account for border taking up 1px on all sides
+        $thumb_height = $thumb_height-2;
+        $thumb_width = $thumb_width-2;
 
         // determine aspect ratio of thumbnail
         $new_ratio = $thumb_width/$thumb_height;
@@ -374,7 +239,7 @@ class RSSPhoto
         $crop_left = floor(($width/2) - ($crop_width/2));
         $crop_top = floor(($height/2) - ($crop_height/2));
 
-        $this->add_debug_msg("Evaluated thumbnail: orig {$height}x{$width}; crop {$crop_height}x{$crop_width}; thumb {$thumb_height}x{$thumb_width}");
+        $this->add_debug("Evaluated thumbnail: orig {$height}x{$width}; crop {$crop_height}x{$crop_width}; thumb {$thumb_height}x{$thumb_width}");
      
         if($image != false)
         {
@@ -386,12 +251,12 @@ class RSSPhoto
       } // if($height!=false && width!=false)
       else
       {
-        $this->add_debug_msg("Height or width or both were false: {$height}x{$width}");
+        $this->add_debug("Height or width or both were false: {$height}x{$width}");
       }
     } // if(!file_exists($thumb_path))
     else
     {
-      $this->add_debug_msg("Thumbnail has already been cached: $thumb_path");
+      $this->add_debug("Thumbnail has already been cached: $thumb_path");
     }
 
     return $thumb_url;
@@ -409,32 +274,39 @@ class RSSPhoto
 
       if(!$imginfo)
       {
-        $this->add_debug_msg("In check_thumbnails(), unsetting index $k of images because getimagesize returned false");
+        $this->add_debug("In check_thumbnails(), unsetting index $k of images because getimagesize returned false");
         unset($this->images[$k]);
       }
       else
       {
         if($imginfo[1] > $this->div_height)
-          $this->div_height = $imginfo[1];
+          $this->div_height = $imginfo[1]+2;
+
+        if($imginfo[0] > $this->div_width)
+          $this->div_width  = $imginfo[0]+2;
       }
     }
+    if($this->div_height>$this->height)
+      $this->div_height=$this->height;
+    if($this->div_width>$this->width)
+      $this->div_width=$this->width;
 
     // read to display
     if(count($this->images)>0)
     {
-      $this->add_debug_msg("In function check_thumbnails(), there are ".count($this->images)." images in ".'$this->images'."; setting status to 1");
+      $this->add_debug("In function check_thumbnails(), there are ".count($this->images)." images in ".'$this->images'."; setting status to 1");
       return 1;
     }
     else
     {
-      $this->add_debug_msg('In function check_thumbnails(), there are no images in $this->images; setting status to -1');
+      $this->add_debug('In function check_thumbnails(), there are no images in $this->images; setting status to -1');
       return -1;
     }
   }
 
   /**
-  *  Get indices of images from array
-  */
+   *  Select indices from an array
+   */
   function select_indices($arr,$method,$num)
   {
     $num = ($num < count($arr)) ? $num : count($arr);
@@ -455,8 +327,8 @@ class RSSPhoto
   }
 
   /**
-  *  Check array elements
-  */
+   *  Check array elements
+   */
   function check_indices($arr)
   {
     for($k=count($arr)-1; $k>=0; $k--)
@@ -524,8 +396,8 @@ class RSSPhoto
   }
 
   /**
-  *  Add image to array
-  */
+   *  Add image to array
+   */
   function add_image($url=false,$link="",$desc="",$title="")
   {
     if($url!=false)
@@ -539,11 +411,11 @@ class RSSPhoto
   }
 
   /**
-   *  Display a jQuery-powered slideshow of thumbnails
+   *  Display a jQuery-powered slideshow of thumbnails with adv controls
    */
-  function slideshow_html()
+  function slideshow2_html()
   {
-    $html = '<div class="rssphoto_slideshow" id="rssphoto-'.$this->id.'" style="height:'.$this->div_height.'px;">';
+    $html = '<div class="rssphoto_slideshow2" id="rssphoto-'.$this->id.'" style="height:'.$this->div_height.'px; width:'.$this->div_width.'px;">';
 
     $active=0;
     foreach($this->images as $img)
@@ -557,7 +429,46 @@ class RSSPhoto
       $html .= '">';
       if($this->show_title && !empty($img['title']))
       {
-        $html .= '<div class="rssphoto_item_title">'.$img['title'].'</div>';
+        $html .= '<div class="title_overlay"><a href="'.$img['link'].'">'.$img['title'].'</a></div>';
+      }
+      $html .= '<a href="'.$img['link'].'"><img src="'.$img['url'].'" alt="" /></a>';
+      $html .= '</div>';
+      $html .= "\n";
+    }
+    $html .= '</div>';
+    $html .= "\n";
+
+    if(count($this->images)>1)
+    {
+      $html .= "<script type='text/javascript'>\n";
+      $html .= "setupSlideshow2(".$this->id.",".$this->interval.");\n";
+      $html .= "</script>\n";
+      $html .= "\n";
+    }
+
+    return $html;
+  }
+
+  /**
+   *  Display a jQuery-powered slideshow of thumbnails
+   */
+  function slideshow_html()
+  {
+    $html = '<div class="rssphoto_slideshow" id="rssphoto-'.$this->id.'" style="height:'.$this->div_height.'px; width:'.$this->div_width.'px;">';
+
+    $active=0;
+    foreach($this->images as $img)
+    {
+      $html .= '<div class="item ';
+      if(!$active)
+      {
+        $html .= 'active'; 
+        $active=1;
+      }
+      $html .= '">';
+      if($this->show_title && !empty($img['title']))
+      {
+        $html .= '<div class="title_overlay"><a href="'.$img['link'].'">'.$img['title'].'</a></div>';
       }
       $html .= '<a href="'.$img['link'].'"><img src="'.$img['url'].'" alt="" /></a>';
       $html .= '</div>';
@@ -602,14 +513,6 @@ class RSSPhoto
     $html .= "\n";
 
     return $html;
-  }
-
-  /**
-   *  Return the RSSPhoto title
-   */
-  function title()
-  {
-    return $this->title;
   }
 
   /**
@@ -679,22 +582,6 @@ class RSSPhoto
   }
 
   /**
-   *  Return the established error message
-   */
-  function get_error()
-  {
-    return $this->error_msg;
-  }
-
-  /**
-   *  Simple test whether RSSPhoto is ready to display
-   */
-  function ready()
-  {
-    return ($this->status==1);
-  }
-
-  /**
    *  Simple error handler 
    */
   function ignominious_death()
@@ -708,11 +595,14 @@ class RSSPhoto
   /**
    *  Track debug messages
    */
-  function add_debug_msg($msg="",$file=false,$line=false)
+  function add_debug($msg="",$file=false,$line=false)
   {
     $this->debug_msgs[]=$msg.($file?" [in file $file]":"").($line?" [on line $line]":"");;
   }
 
+  /**
+   *  Print out the debug messages
+   */
   function print_debug()
   {
     print "<ul>\n";
@@ -720,8 +610,183 @@ class RSSPhoto
     {
       print "<li>";
       print $this->debug_msgs[$k];
-      print "</li>";
+      print "</li>\n";
     }
     print "</ul>\n";
+  }
+
+  /*********************************
+   *  Publically exposed functions
+   *********************************/
+
+  /**
+   *  Return the RSSPhoto title
+   */
+  function title()
+  {
+    return $this->title;
+  }
+
+  /**
+   *  Chooser function drill down to either the slideshow or static thumbnail display
+   */
+  function html()
+  {
+    switch($this->output)
+    {
+      case 'Slideshow':
+        return $this->slideshow_html();
+        break;
+      case 'Static':
+        return $this->static_html();
+        break;
+      case 'Slideshow2':
+      default:
+        return $this->slideshow2_html();
+        break;
+    }
+  }
+
+  /**
+   *  Simple test whether RSSPhoto is ready to display
+   */
+  function ready()
+  {
+    return ($this->status==1);
+  }
+
+  /**
+   *  Return the established error message
+   */
+  function get_error()
+  {
+    return $this->error_msg;
+  }
+
+  /**
+   *  Initialize RSSPhoto.  
+   *  Call after construction (and settings established), before display (e.g., before calling html()).
+   */
+  function init()
+  {
+    $this->id = rand();
+
+    // set up the SimplePie feed
+    $this->init_feed($this->url,$this->parser,$this->cache_location,$this->force_feed);
+
+    if(empty($this->feed))
+    {
+      $this->add_debug('Dying in function init() because $this->feed is empty');
+      $this->ignominious_death();
+      return;
+    }
+
+    if(is_wp_error($this->feed))
+    {
+      $this->add_debug('Dying in function init() because $this->feed is a Wordpress WP_Error object');
+      $this->set_error($this->feed->get_error_message());
+      $this->ignominious_death();
+      return;
+    }
+
+    // get images, generate thumbnails, etc.
+    // consider limiting this to some reasonable number for feeds that have >100s of items?
+    if($this->feed->get_item_quantity() > 0)
+    {
+      $item_idxs = $this->select_indices($this->feed->get_items(),$this->item_sel,$this->num_item);
+
+      // choose feed item(s)
+      foreach($item_idxs as $item_idx)
+      {
+        $item = $this->feed->get_item($item_idx);
+
+        if($item != false)
+        {
+          // pull out image url, link
+          if($this->feed->get_type() & SIMPLEPIE_TYPE_RSS_ALL)
+          {
+            $this->add_debug('Feed is of type RSS');
+            switch($this->rss_type_src)
+            {
+              case 'Enclosures':
+                $this->add_debug('Forced to look in enclosures for images');
+                $image_url = $this->get_img_urls($enclosures,$this->img_sel,$this->num_img,'Enclosures');
+                break;
+              case 'Description':
+                $this->add_debug('Forced to look in description for images');
+                $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Description');
+                break;
+              case 'Content':
+                $this->add_debug('Forced to look in content for images');
+                $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Content');
+                break;
+              case 'Choose':
+                if($enclosures = $item->get_enclosures())
+                {
+                  $this->add_debug('There are enclosures in the feed; looking for images in the enclosures');
+                  $image_url = $this->get_img_urls($enclosures,$this->img_sel,$this->num_img,'Enclosures');
+                }
+                else
+                {
+                  $this->add_debug('There are no enclosures in the feed; looking for images in the description');
+                  $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Description');
+                }
+                break;
+            }
+          }
+          elseif ($this->feed->get_type() & SIMPLEPIE_TYPE_ATOM_ALL)
+          {
+            $this->add_debug('Feed is of type Atom; looking for images in content');
+            $image_url = $this->get_img_urls($item,$this->img_sel,$this->num_img,'Content');
+          }
+
+          if(is_array($image_url))
+          {
+            foreach($image_url as $url)
+            {
+              $this->add_debug("Evaluating $url");
+              $thumb_url = $this->create_thumbnail($url);
+              if($thumb_url!=false)
+              {
+                $this->add_debug("Adding locally stored file $thumb_url");
+                $this->add_image($thumb_url,$item->get_link(0),$item->get_description(),$item->get_title());
+              }
+              else
+                $this->add_debug("Failed to add image at $image_url because create_thumbnail() returned false");
+            }
+          }
+          else
+          {
+            $this->add_debug('Dying in function init() because $image_url is not an array');
+            $this->set_error('Bad image urls');
+            $this->ignominious_death();
+            return;
+          }
+        }
+        else // item==false
+        {
+          if($this->feed->error())
+            $this->set_error($this->feed->error());
+          else
+            $this->set_error("Tried to load item #$item_idx from $url and couldn't!");
+
+          $this->add_debug('Died in function init() because a feed item was false');
+          $this->ignominious_death();
+          return;
+        }
+      }
+    }
+
+    $this->status = $this->check_thumbnails();
+    //$this->print_debug();
+  }
+
+  /**
+   *  Constructor.  
+   *  Call with array of settings where keys are the setting names, values are the settings.
+   */
+  function RSSPhoto($settings=array())
+  {
+    $this->update($settings);
   }
 }

@@ -110,7 +110,7 @@ class RSSPhotoWidget extends WP_Widget
                                                         'rssphoto_item_sel'=>'Random',
                                                         'rssphoto_num_item'=>1,
                                                         'rssphoto_show_title'=>0,
-                                                        'rssphoto_output'=>'Slideshow'));
+                                                        'rssphoto_output'=>'Slideshow2'));
 
     $title    = htmlspecialchars($instance['rssphoto_title']);
     $url      = htmlspecialchars($instance['rssphoto_url']);
@@ -136,8 +136,9 @@ class RSSPhotoWidget extends WP_Widget
     echo '<div style="clear:both;">&nbsp;</div>';
     echo '<div style="text-align:right; float:left; width:130px;">' . __('Output:') . '</div>';
     echo '<div style="text-align:left; float:left; width:110px; padding-left:5px;">';
-    echo '<label for="' . $this->get_field_name('rssphoto_output_rssphoto_slideshow') . '"><input ' . (($output=='Slideshow') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_output_rssphoto_slideshow') . '" name="' . $this->get_field_name('rssphoto_output') . '" value="Slideshow">' . __('Slideshow') . '</label><br>';
-    echo '<label for="' . $this->get_field_name('rssphoto_output_static')    . '"><input ' . (($output=='Static')    ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_output_static')    . '" name="' . $this->get_field_name('rssphoto_output') . '" value="Static">'    . __('Static')    . '</label><br>';
+    echo '<label for="' . $this->get_field_name('rssphoto_output_slideshow2') . '"><input ' . (($output=='Slideshow2') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_output_slideshow2') . '" name="' . $this->get_field_name('rssphoto_output') . '" value="Slideshow2">' . __('Slideshow v2') . '</label><br>';
+    echo '<label for="' . $this->get_field_name('rssphoto_output_slideshow')  . '"><input ' . (($output=='Slideshow')  ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_output_slideshow')  . '" name="' . $this->get_field_name('rssphoto_output') . '" value="Slideshow">'  . __('Slideshow')    . '</label><br>';
+    echo '<label for="' . $this->get_field_name('rssphoto_output_static')     . '"><input ' . (($output=='Static')     ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_output_static')     . '" name="' . $this->get_field_name('rssphoto_output') . '" value="Static">'     . __('Static')       . '</label><br>';
     echo '</div>';
 
     echo '<div style="clear:both;">&nbsp;</div>';
