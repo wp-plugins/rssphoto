@@ -23,7 +23,7 @@ class RSSPhoto
    * Internal variables
    ****************************/
   var $version        = '0.8'; // current version of RSSPhoto
-  var $debug          = 0; // '0' for normal; '1' to print debug comments (hidden by default by <!-- and --> tags)
+  var $debug          = 1; // '0' for normal; '1' to print debug comments (hidden by default by <!-- and --> tags)
   var $images         = array(); // will store images to display
   var $error_msg      = ""; // most recent error message
   var $debug_msgs     = array(); // array of debug messages: see print_debug()
@@ -45,8 +45,8 @@ class RSSPhoto
    ****************************/
   var $title          = 'RSSPhoto'; // title shown above the widget
   var $url            = 'http://photography.spencerkellis.net/atom.php'; // url of feed to parse
-  var $width          = 100; // [W] in px or 'variable' (only one may have the value 'variable')
-  var $height         = 180; // [H] in px or 'variable' (only one may have the value 'variable')
+  var $width          = 150; // [W] in px or 'variable' (only one may have the value 'variable')
+  var $height         = 120; // [H] in px or 'variable' (only one may have the value 'variable')
   var $img_sel        = 'Most Recent'; // method of selecting images from feed items.  'Most Recent' or 'Random'
   var $num_img        = 1; // how many images to pull out per feed item
   var $min_size       = 10; // minimum size of image (discarded if less)
@@ -60,8 +60,9 @@ class RSSPhoto
   /****************************
    * SimplePie settings
    ****************************/
+
   var $feed;
-  var $cache_location = 'wp-content/cache';
+  var $cache_dir      = 'cache'; 
   var $force_feed     = false;
 
   /*************************
@@ -71,7 +72,7 @@ class RSSPhoto
   /**
    *  Chooser function to use either the SimplePie Core or built-in feed parser
    */
-  function init_feed($url='http://www.spencerkellis.net/atom.php',$parser='built-in',$cacheloc='',$forcefeed=false)
+  function init_feed($url='http://www.spencerkellis.net/atom.php',$parser='built-in',$cachedir='',$forcefeed=false)
   {
     switch($parser)
     {
@@ -80,7 +81,7 @@ class RSSPhoto
         if(class_exists('SimplePie'))
         {
           $this->feed = new SimplePie();
-          $this->feed->set_cache_location($cacheloc);
+          $this->feed->set_cache_location(WP_CONTENT_DIR . "/" . $cachedir);
           $this->feed->set_feed_url($url);
           $this->feed->force_feed($forcefeed);
           $this->feed->init();
@@ -113,8 +114,8 @@ class RSSPhoto
     }
 
     $image_filename = "rssphoto-".md5($image_url)."-{$this->width}x{$this->height}.jpg";
-    $thumb_path = $this->cache_location."/".$image_filename;
-    $thumb_url = get_bloginfo('wpurl')."/$thumb_path";
+    $thumb_path = WP_CONTENT_DIR . "/" . $this->cache_dir . "/" . $image_filename;
+    $thumb_url = get_bloginfo('wpurl')."/wp-content/". $this->cache_dir ."/$image_filename";
     if(!file_exists($thumb_path))
     {
       $imginfo = @getimagesize($image_url);
@@ -246,8 +247,18 @@ class RSSPhoto
         {
           $quality = 85;
           $thumb=imagecreatetruecolor($thumb_width,$thumb_height);
-          @imagecopyresampled($thumb,$image,0,0,$crop_left,$crop_top,$thumb_width,$thumb_height,$crop_width,$crop_height);
-          @imagejpeg($thumb,$thumb_path,$quality);
+          $result=@imagecopyresampled($thumb,$image,0,0,$crop_left,$crop_top,$thumb_width,$thumb_height,$crop_width,$crop_height);
+          if(!$result)
+          {
+            $this->add_debug("Call to function imagecopyresample failed");
+            return false;
+          }
+          $result=@imagejpeg($thumb,$thumb_path,$quality);
+          if(!$result)
+          {
+            $this->add_debug("Call to imagejpeg([resource],$thumb_path,$quality) failed");
+            return false;
+          }
         }
       } // if($height!=false && width!=false)
       else
@@ -271,11 +282,11 @@ class RSSPhoto
   {
     for($k=count($this->images)-1; $k>=0; $k--)
     {
-      $imginfo=getimagesize($this->images[$k]['url']);
+      $imginfo=@getimagesize($this->images[$k]['url']);
 
       if(!$imginfo)
       {
-        $this->add_debug("In check_thumbnails(), unsetting index $k of images because getimagesize returned false");
+        $this->add_debug("In check_thumbnails(), unsetting index $k of images ({$this->images[$k]['url']}) because getimagesize returned false");
         unset($this->images[$k]);
       }
       else
@@ -688,7 +699,7 @@ class RSSPhoto
     $this->id = rand();
 
     // set up the SimplePie feed
-    $this->init_feed($this->url,$this->parser,$this->cache_location,$this->force_feed);
+    $this->init_feed($this->url,$this->parser,$this->cache_dir,$this->force_feed);
 
     if(empty($this->feed))
     {
