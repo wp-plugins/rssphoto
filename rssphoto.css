@@ -113,7 +113,7 @@
 
 .rssphoto_slideshow2 div img
 {
-  margin-top:1px;
+  border:solid black 1px;
   text-decoration: none;
 }
 
