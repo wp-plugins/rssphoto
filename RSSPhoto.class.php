@@ -104,6 +104,30 @@ class RSSPhoto
   }
 
   /**
+   *  Save images locally using cURL (for when allow_url_fopen is off)
+   *  Idea and first implementation from http://www.edmondscommerce.co.uk/blog/php/php-save-images-using-curl/
+   */
+   
+  function save_image($img,$fullpath)
+  {
+    $ch = curl_init ($img);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_BINARYTRANSFER,1);
+    $rawdata=curl_exec($ch);
+    curl_close ($ch);
+    if(file_exists($fullpath))
+    {
+      unlink($fullpath);
+    }
+    $fp = fopen($fullpath,'x');
+    fwrite($fp, $rawdata);
+    fclose($fp);
+  }
+   
+
+
+  /**
    *  Create thumbnails of a given image url in the local cache
    */
   function create_thumbnail($image_url)
@@ -125,10 +149,17 @@ class RSSPhoto
 
     if(!file_exists($thumb_path))
     {
+      if(!ini_get('allow_url_fopen'))
+      {
+        // save image locally and update $image_url
+        $this->save_image($image_url,$thumb_path);
+        $image_url=$thumb_path;
+      }
+
       $imginfo = @getimagesize($image_url);
       if(!$imginfo)
       {
-        $this->add_debug("Failed to open image at $image_url using getimagesize: returning false from function create_thumbnail()");
+        $this->add_debug("Failed to open image at $image_url using getimagesize() in function create_thumbnail(): returning false");
         return false;
       }
 
