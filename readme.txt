@@ -12,7 +12,7 @@ A customizable plugin to display photos from an RSS or Atom feed as a widget or 
 
 RSSPhoto is a Wordpress plugin to display photos from RSS and Atom feeds. It includes a widget for easy addition to a sidebar, or it can be configured by shortcode to display on any page.  Easy theme integration is also possible.  RSSPhoto includes jQuery-powered, cross-browser compatible slideshow as well as static image display.
 
-RSSPhoto uses the built-in Wordpress functions to parse RSS and Atom feeds (which are based on SimplePie).  A cache directory, writable by the server, is required for thumbnail storage.  The GD library is required for generating thumbnails.  If the GD library is not present, the script will default to displaying images with the img width/height attributes forced to thumbnail size.
+RSSPhoto uses the built-in Wordpress functions to parse RSS and Atom feeds (which are based on SimplePie).  A cache directory, writable by the server, is required for thumbnail storage.  The GD library is required for generating thumbnails.
 
 
 == Installation ==
