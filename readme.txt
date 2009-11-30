@@ -17,7 +17,7 @@ RSSPhoto uses the built-in Wordpress functions to parse RSS and Atom feeds (whic
 
 == Installation ==
 
-RSSPhoto install simply requires creating a writable directory in `wp-content/cache to store thumbnails, and installing/activating the plugin itself:
+RSSPhoto install simply requires creating a writable directory in `wp-content/cache` to store thumbnails, and installing/activating the plugin itself:
 
   1. If it doesn't already exist, create the directory `wp-content/cache` and give it permissions of 755
   2. Upload all files to the `wp-content/plugins/rssphoto` directory
@@ -34,18 +34,24 @@ To use the shortcode:
    1. Edit the page you want to display the images
    2. Add the following text to the page:
 
-      [rssphoto url="your.url.com"]
+      [rssphoto url="http://your.url.com/feed.xml"]
 
    3. Include any of the following attributes (see descriptions of these settings below)
 
-      * output="Slideshow|Static"
-      * url="your.url.com"
-      * item_sel="Random|Most Recent"
-      * num_item="[Number of feed items]"
-      * num_img="[Number of images per feed item]"
-      * img_sel="Random|Most Recent"
-      * fixed="Width|Height|Max"
-      * size="[size in pixels]"
+      * title="Title"
+      * url="http://your.url.com/feed.xml"
+      * height=150
+      * width=185
+      * img_sel="Most Recent"
+      * num_img=1
+      * item_sel="Random"
+      * num_item=10
+      * show_title=1
+      * show_img_title=1
+      * output="Slideshow2"
+      * interval=6000
+      * min_size=10
+      * max_size=500
 
 To integrate with a theme:
 
@@ -57,15 +63,16 @@ To integrate with a theme:
       `<?php
       $settings[0]['title']='RSSPhoto';
       $settings[0]['url']='http://photography.spencerkellis.net/rss.php';
-      $settings[0]['height']=120;
-      $settings[0]['width']=150;
+      $settings[0]['height']=150;
+      $settings[0]['width']=185;
       $settings[0]['img_sel']='Random';
       $settings[0]['num_img']=1;
       $settings[0]['item_sel']='Random';
       $settings[0]['num_item']=10;
       $settings[0]['show_title']=1;
+      $settings[0]['show_img_title']=1;
       $settings[0]['output']='Slideshow2';
-      $settings[0]['interval']=10000;
+      $settings[0]['interval']=6000;
       $settings[0]['before_title']='<h2>';
       $settings[0]['after_title']='</h2>';
       $settings[0]['before_html']='<li>';
@@ -75,15 +82,20 @@ To integrate with a theme:
 
 Here's a quick description of the settings:
 
-   1. Title: text that appears over the image in the sidebar.
-   2. Output: images will load as a slideshow or can be displayed statically
-   3. URL: address of the RSS or Atom feed.
-   4. Item Selection: RSSPhoto will choose a random feed item, or the most recent feed item
-   5. # Items: choose how many feed items to display
-   6. # Images per Item: how many images embedded in each feed item to display
-   7. Image selection: the script can randomly select images or just display the first image in the feed item
-   8. Fixed dimension: select whether the width, height, or longest side should be fixed.
-   9. Size (px): size in pixels of the width, height, or longest side (previously selected).
+   1. (title) *Title*: Text that appears over the RSSPhoto image(s).  *"String in quotes"*
+   2. (url) *URL*: address of the RSS or Atom feed. *"http://your.url.com/feed.xml"*
+   3. (height) *Height*: height of the RSSPhoto images in pixels; or, 'variable' to maintain the aspect ratio given the specified width (see #4). *[Number]|"variable"*
+   4. (width) *Width*: width of the RSSPhoto images in pixels; or, 'variable' to maintain the aspect ratio given the specified height (see #3). *[Number]|"variable"*
+   5. (img_sel) *Image selection*: the script can randomly select images or just display the first image in the feed item. *"Random"|"Most Recent"*
+   6. (num_img) *# Images per Item*: how many images embedded in each feed item to display. *[Number]*
+   7. (item_sel) *Item Selection*: RSSPhoto will choose a random feed item, or the most recent feed item. *"Random"|"Most Recent"*
+   8. (num_item) *# Items*: choose how many feed items to display. *[Number]*
+   9. (show_title) *Show Title*: whether to display the main RSSPhoto title over the images. *1|0*
+   10. (show_img_title) *Show Image Titles*: whether to display the titles of each displayed thumbnail. *1|0*
+   11. (output) *Output*: images will load as a slideshow or can be displayed statically.  *"Slideshow2"|"Slideshow"|"Static"*
+   12. (interval) *Slideshow Interval*: the amount of time in milliseconds to wait between image transitions for the slideshows. *[Number]*
+
+Note that for the `height` and `width` properties you should only set one or the other to "variable", since RSSPhoto will use the other integer-valued dimension to fix the aspect ratio.
 
 
 == Frequently Asked Questions ==
@@ -103,10 +115,6 @@ And change the value as needed (default is 10 pixels).
 = My feed doesn't display any photos and there are no problems with the feed validation =
 
 RSS feeds can be implemented in numerous ways.  RSSPhoto attempts to intelligently find the pictures in an RSS feed, but sometimes you need to point it in the right direction.  In `RSSPhoto.class.php`, try changing the value of the variable `$rss_type_src` to one of the following values: 'Choose' (default), 'Description', 'Content', or 'Enclosures'.
-
-= How do I display the title for each image? =
-
-In `RSSPhoto.class.php`, set the variable `$show_title` to 1.  Note that this capability is still in beta, and there are some layout issues that may crop up when the title is displayed.  You can modify the CSS of the title (which is wrapped in a div just before the image) in `rssphoto.css` under the class `rssphoto_item_title`.
 
 = My feed doesn't display any photos; W3C Feed Validation says it's valid but has a warning about wrong media type =
 
@@ -136,14 +144,33 @@ Fatal error: Class .SimplePie. not found in /home/username/public_html/wp-conten
 
 If you receive this error, the most likely problem is that the SimplePie Core plugin is not installed or activated.  Here's a link to the [SimplePie Core plugin](http://wordpress.org/extend/plugins/simplepie-core/ "SimplePie Core plugin").
 
+= I'm still having problems.  What should I do? =
+
+Please feel free to leave a comment at the [plugin's website](http:/blog.spencerkellis.net/projects/rssphoto "RSSPhoto Website").  I usually respond fairly quickly.
+
+If you're interested in getting your hands dirty, there's a debug mode you can enable.  In `RSSPhoto.class.php`, set the `$debug` variable to 1:
+
+`var $debug = 1;`
+
+By default, the debug output is hidden in HTML comments (&lt;!-- and --&gt;), so view the page source to find the debug messages.  This could offer some useful information and could help in leaving detailed comments for troubleshooting.
+
 
 == Screenshots ==
 
-1.  What the plugin looks like in my [Sidebar](http://blog.spencerkellis.net "RSSPhoto loaded in my sidebar").
+1.  Slideshow v2 with image title shown [Sidebar](http://blog.spencerkellis.net "RSSPhoto loaded in my sidebar").
 2.  The plugin settings in WP Admin -> Appearances -> Widgets.
 
 
 == Changelog ==
+
+v0.8
+
+* Introduction of Slideshow v2: principal improvement is the ability to fade in and out image titles when the user moves the cursor over the image.
+* Simplified method for specifying dimensions: set the width and height directly, and RSSPhoto will automatically general thumbnails without distortion from incorrect aspect ratio.
+* Introduction of a debug mode to simplify troubleshooting
+* Bug fix: previous versions could generate incorrect paths to the cache when the blog URL and wordpress URL were different, resulting in no thumbnails being displayed.
+* Various stability, performance, and bug fixes.
+
 
 v0.7.1
 

@@ -23,7 +23,7 @@ class RSSPhoto
    * Internal variables
    ****************************/
   var $version        = '0.8'; // current version of RSSPhoto
-  var $debug          = 1; // '0' for normal; '1' to print debug comments (hidden by default by <!-- and --> tags)
+  var $debug          = 0; // '0' for normal; '1' to print debug comments (hidden by default by <!-- and --> tags)
   var $images         = array(); // will store images to display
   var $error_msg      = ""; // most recent error message
   var $debug_msgs     = array(); // array of debug messages: see print_debug()
@@ -155,17 +155,17 @@ class RSSPhoto
         $old_ratio = $width/$height;
 
         // determine thumbnail dimensions from settings
-        if(!strcmp($this->width,'variable') && !strcmp($this->height,'variable'))
+        if(!strcasecmp($this->width,'variable') && !strcasecmp($this->height,'variable'))
         {
           $thumb_width = $width;
           $thumb_height = $height;
         }
-        elseif(!strcmp($this->width,'variable')) // variable width: hold orig aspect ratio
+        elseif(!strcasecmp($this->width,'variable')) // variable width: hold orig aspect ratio
         {
           $thumb_width = floor($old_ratio*$this->height);
           $thumb_height = $this->height;
         }
-        elseif(!strcmp($this->height,'variable')) // variable height: hold orig aspect ratio
+        elseif(!strcasecmp($this->height,'variable')) // variable height: hold orig aspect ratio
         {
           $thumb_width = $this->width;
           $thumb_height = floor($this->width/$old_ratio);
@@ -376,7 +376,7 @@ class RSSPhoto
           {
             foreach($this->mime_types as $mime)
             {
-              if(!strcmp($arr[$k]->get_type(),$mime))
+              if(!strcasecmp($arr[$k]->get_type(),$mime))
               {
                 $mime_flag=1;
                 break;
@@ -387,7 +387,7 @@ class RSSPhoto
           {
             foreach($this->medium_types as $medium)
             {
-              if(!strcmp($arr[$k]->get_medium(),$medium))
+              if(!strcasecmp($arr[$k]->get_medium(),$medium))
               {
                 $medium_flag=1;
                 break;

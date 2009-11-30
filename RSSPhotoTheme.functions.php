@@ -30,22 +30,23 @@ function init_theme_rssphoto()
 
 function display_rssphoto($input=array())
 {
-  if(!empty($input['title']))      $settings['rssphoto_title']      =$input['title'];
-  if(!empty($input['url']))        $settings['rssphoto_url']        =$input['url'];
-  if(!empty($input['height']))     $settings['rssphoto_height']     =$input['height'];
-  if(!empty($input['width']))      $settings['rssphoto_width']      =$input['width'];
-  if(!empty($input['img_sel']))    $settings['rssphoto_img_sel']    =$input['img_sel'];
-  if(!empty($input['num_img']))    $settings['rssphoto_num_img']    =$input['num_img'];
-  if(!empty($input['item_sel']))   $settings['rssphoto_item_sel']   =$input['item_sel'];
-  if(!empty($input['num_item']))   $settings['rssphoto_num_item']   =$input['num_item'];
-  if(!empty($input['show_title'])) $settings['rssphoto_show_title'] =$input['show_title'];
-  if(!empty($input['output']))     $settings['rssphoto_output']     =$input['output'];
-  if(!empty($input['interval']))   $settings['rssphoto_interval']   =$input['interval'];
+  if(!empty($input['title']))          $settings['rssphoto_title']          =$input['title'];
+  if(!empty($input['url']))            $settings['rssphoto_url']            =$input['url'];
+  if(!empty($input['height']))         $settings['rssphoto_height']         =$input['height'];
+  if(!empty($input['width']))          $settings['rssphoto_width']          =$input['width'];
+  if(!empty($input['img_sel']))        $settings['rssphoto_img_sel']        =$input['img_sel'];
+  if(!empty($input['num_img']))        $settings['rssphoto_num_img']        =$input['num_img'];
+  if(!empty($input['item_sel']))       $settings['rssphoto_item_sel']       =$input['item_sel'];
+  if(!empty($input['num_item']))       $settings['rssphoto_num_item']       =$input['num_item'];
+  if(!empty($input['show_title']))     $settings['rssphoto_show_title']     =$input['show_title'];
+  if(!empty($input['show_img_title'])) $settings['rssphoto_show_img_title'] =$input['show_img_title'];
+  if(!empty($input['output']))         $settings['rssphoto_output']         =$input['output'];
+  if(!empty($input['interval']))       $settings['rssphoto_interval']       =$input['interval'];
 
-  if(!isset($input['before_html']))  $input['before_html'] = "";
-  if(!isset($input['after_html']))   $input['after_html'] = "";
-  if(!isset($input['before_title'])) $input['before_title'] = "";
-  if(!isset($input['after_title']))  $input['after_title'] = "";
+  if(!isset($input['before_html']))    $input['before_html'] = "";
+  if(!isset($input['after_html']))     $input['after_html'] = "";
+  if(!isset($input['before_title']))   $input['before_title'] = "";
+  if(!isset($input['after_title']))    $input['after_title'] = "";
 
   if( class_exists('RSSPhoto') )
   {
