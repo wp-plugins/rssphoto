@@ -801,7 +801,7 @@ class RSSPhoto
                 $this->add_image($thumb_url,$item->get_link(0),$item->get_description(),$item->get_title());
               }
               else
-                $this->add_debug("Failed to add image at $image_url because create_thumbnail() returned false");
+                $this->add_debug("Failed to add image at $url because create_thumbnail() returned false");
             }
           }
           else
