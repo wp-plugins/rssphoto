@@ -42,6 +42,11 @@ function display_rssphoto($input=array())
   if(!empty($input['output']))     $settings['rssphoto_output']     =$input['output'];
   if(!empty($input['interval']))   $settings['rssphoto_interval']   =$input['interval'];
 
+  if(!isset($input['before_html']))  $input['before_html'] = "";
+  if(!isset($input['after_html']))   $input['after_html'] = "";
+  if(!isset($input['before_title'])) $input['before_title'] = "";
+  if(!isset($input['after_title']))  $input['after_title'] = "";
+
   if( class_exists('RSSPhoto') )
   {
     $rssphoto = new RSSPhoto($settings);

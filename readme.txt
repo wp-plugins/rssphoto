@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget, shortcode
 Requires at least: 2.8
 Tested up to: 2.8.6
-Stable tag: 0.7.1
+Stable tag: 0.8
 
 A customizable plugin to display photos from an RSS or Atom feed as a widget or shortcode.
 
@@ -12,24 +12,16 @@ A customizable plugin to display photos from an RSS or Atom feed as a widget or 
 
 RSSPhoto is a Wordpress plugin to display photos from RSS and Atom feeds. It includes a widget for easy addition to a sidebar, or it can be configured by shortcode to display on any page.  Easy theme integration is also possible.  RSSPhoto includes jQuery-powered, cross-browser compatible slideshow as well as static image display.
 
-RSSPhoto *no longer requires* the SimplePie Core Wordpress plugin to parse RSS and Atom feeds, and instead uses built-in Wordpress functions.  A cache directory, writable by the server, is required for thumbnail storage.  The GD library is required for generating thumbnails.  If the GD library is not present, the script will default to displaying images with the img width/height attributes forced to thumbnail size.
+RSSPhoto uses the built-in Wordpress functions to parse RSS and Atom feeds (which are based on SimplePie).  A cache directory, writable by the server, is required for thumbnail storage.  The GD library is required for generating thumbnails.  If the GD library is not present, the script will default to displaying images with the img width/height attributes forced to thumbnail size.
 
 
 == Installation ==
 
-RSSPhoto install simply requires creating a writable directory (default location wp-content/cache) to store thumbnails, and installing/activating the plugin itself:
+RSSPhoto install simply requires creating a writable directory in `wp-content/cache to store thumbnails, and installing/activating the plugin itself:
 
-  1. If it doesn't already exist, create the directory `/wp-content/cache` and give it permissions of 755
-  2. Upload all files to the `/wp-content/plugins/` directory (consider creating an rssphoto subdirectory to hold the plugin files)
+  1. If it doesn't already exist, create the directory `wp-content/cache` and give it permissions of 755
+  2. Upload all files to the `wp-content/plugins/rssphoto` directory
   3. Activate the plugin through the 'Plugins' menu in Wordpress
-
-Probably the easiest way to accomplish step 1 is through an FTP program.  If you're interested, here's how to do it on the command line:
-
-   1. cd {blog-dir}/wp-content
-   2. mkdir cache
-   3. chmod 755 cache
-
-Note that there are *some cases* which may require the SimplePie Core plugin.  For instance, if your feed does not correctly identify itself as an XML file, certain SimplePie settings must be changed which are not available through the built-in Wordpress SimplePie integration.  See the FAQ for more information.
 
 To use the widget:
 
@@ -65,11 +57,15 @@ To integrate with a theme:
       `<?php
       $settings[0]['title']='RSSPhoto';
       $settings[0]['url']='http://photography.spencerkellis.net/rss.php';
-      $settings[0]['output']='Slideshow';
+      $settings[0]['height']=120;
+      $settings[0]['width']=150;
+      $settings[0]['img_sel']='Random';
+      $settings[0]['num_img']=1;
+      $settings[0]['item_sel']='Random';
       $settings[0]['num_item']=10;
+      $settings[0]['show_title']=1;
+      $settings[0]['output']='Slideshow2';
       $settings[0]['interval']=10000;
-      $settings[0]['fixed']='Height';
-      $settings[0]['size']=80;
       $settings[0]['before_title']='<h2>';
       $settings[0]['after_title']='</h2>';
       $settings[0]['before_html']='<li>';

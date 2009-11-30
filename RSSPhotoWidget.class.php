@@ -60,9 +60,12 @@ class RSSPhotoWidget extends WP_Widget
 
     if($this->rssphoto->ready())
     {
-      echo $this->before_title;
-      echo apply_filters('widget_title', $this->rssphoto->title());
-      echo $this->after_title;
+      if($this->rssphoto->show_title())
+      {
+        echo $this->before_title;
+        echo apply_filters('widget_title', $this->rssphoto->title());
+        echo $this->after_title;
+      }
       echo $this->rssphoto->html();
     }
     else
@@ -80,16 +83,18 @@ class RSSPhotoWidget extends WP_Widget
   function update($new_instance, $old_instance)
   {
     $instance = $old_instance;
-    $instance['rssphoto_title']      = strip_tags(stripslashes($new_instance['rssphoto_title']));
-    $instance['rssphoto_url']        = strip_tags(stripslashes($new_instance['rssphoto_url']));
-    $instance['rssphoto_height']     = strip_tags(stripslashes($new_instance['rssphoto_height']));
-    $instance['rssphoto_width']      = strip_tags(stripslashes($new_instance['rssphoto_width']));
-    $instance['rssphoto_img_sel']    = strip_tags(stripslashes($new_instance['rssphoto_img_sel']));
-    $instance['rssphoto_num_img']    = strip_tags(stripslashes($new_instance['rssphoto_num_img']));
-    $instance['rssphoto_item_sel']   = strip_tags(stripslashes($new_instance['rssphoto_item_sel']));
-    $instance['rssphoto_num_item']   = strip_tags(stripslashes($new_instance['rssphoto_num_item']));
-    $instance['rssphoto_show_title'] = strip_tags(stripslashes($new_instance['rssphoto_show_title']));
-    $instance['rssphoto_output']     = strip_tags(stripslashes($new_instance['rssphoto_output']));
+    $instance['rssphoto_title']          = strip_tags(stripslashes($new_instance['rssphoto_title']));
+    $instance['rssphoto_url']            = strip_tags(stripslashes($new_instance['rssphoto_url']));
+    $instance['rssphoto_height']         = strip_tags(stripslashes($new_instance['rssphoto_height']));
+    $instance['rssphoto_width']          = strip_tags(stripslashes($new_instance['rssphoto_width']));
+    $instance['rssphoto_img_sel']        = strip_tags(stripslashes($new_instance['rssphoto_img_sel']));
+    $instance['rssphoto_num_img']        = strip_tags(stripslashes($new_instance['rssphoto_num_img']));
+    $instance['rssphoto_item_sel']       = strip_tags(stripslashes($new_instance['rssphoto_item_sel']));
+    $instance['rssphoto_num_item']       = strip_tags(stripslashes($new_instance['rssphoto_num_item']));
+    $instance['rssphoto_show_title']     = strip_tags(stripslashes($new_instance['rssphoto_show_title']));
+    $instance['rssphoto_show_img_title'] = strip_tags(stripslashes($new_instance['rssphoto_show_img_title']));
+    $instance['rssphoto_output']         = strip_tags(stripslashes($new_instance['rssphoto_output']));
+    $instance['rssphoto_interval']       = strip_tags(stripslashes($new_instance['rssphoto_interval']));
 
     return $instance;
   }
@@ -109,18 +114,23 @@ class RSSPhotoWidget extends WP_Widget
                                                         'rssphoto_num_img'=>1,
                                                         'rssphoto_item_sel'=>'Random',
                                                         'rssphoto_num_item'=>1,
-                                                        'rssphoto_show_title'=>0,
-                                                        'rssphoto_output'=>'Slideshow2'));
+                                                        'rssphoto_show_title'=>1,
+                                                        'rssphoto_show_img_title'=>1,
+                                                        'rssphoto_output'=>'Slideshow2',
+                                                        'rssphoto_interval'=>6000));
 
-    $title    = htmlspecialchars($instance['rssphoto_title']);
-    $url      = htmlspecialchars($instance['rssphoto_url']);
-    $height   = htmlspecialchars($instance['rssphoto_height']);
-    $width    = htmlspecialchars($instance['rssphoto_width']);
-    $img_sel  = htmlspecialchars($instance['rssphoto_img_sel']);
-    $num_img  = htmlspecialchars($instance['rssphoto_num_img']);
-    $item_sel = htmlspecialchars($instance['rssphoto_item_sel']);
-    $num_item = htmlspecialchars($instance['rssphoto_num_item']);
-    $output   = htmlspecialchars($instance['rssphoto_output']);
+    $title          = htmlspecialchars($instance['rssphoto_title']);
+    $url            = htmlspecialchars($instance['rssphoto_url']);
+    $height         = htmlspecialchars($instance['rssphoto_height']);
+    $width          = htmlspecialchars($instance['rssphoto_width']);
+    $img_sel        = htmlspecialchars($instance['rssphoto_img_sel']);
+    $num_img        = htmlspecialchars($instance['rssphoto_num_img']);
+    $item_sel       = htmlspecialchars($instance['rssphoto_item_sel']);
+    $num_item       = htmlspecialchars($instance['rssphoto_num_item']);
+    $show_title     = htmlspecialchars($instance['rssphoto_show_title']);
+    $show_img_title = htmlspecialchars($instance['rssphoto_show_img_title']);
+    $output         = htmlspecialchars($instance['rssphoto_output']);
+    $interval       = htmlspecialchars($instance['rssphoto_interval']);
 
     //Display form
 
@@ -132,6 +142,14 @@ class RSSPhotoWidget extends WP_Widget
     echo '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_title') . '" name="' . $this->get_field_name('rssphoto_title') . '" type="text" value="' . $title . '" />';
     echo '</div>';
 
+    // Show Title
+    echo '<div style="clear:both;">&nbsp;</div>';
+    echo '<div style="text-align:right; float:left; width:130px;">' . __('Show Title:') . '</div>';
+    echo '<div style="text-align:left; float:left; width:110px; padding-left:5px;">';
+    echo '<label for="' . $this->get_field_name('rssphoto_show_title_yes') . '"><input ' . (($show_title=='1') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_show_title_yes') . '" name="' . $this->get_field_name('rssphoto_show_title') . '" value="1">' . __('Yes') . '</label><br>';
+    echo '<label for="' . $this->get_field_name('rssphoto_show_title_no')  . '"><input ' . (($show_title=='0') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_show_title_no')  . '" name="' . $this->get_field_name('rssphoto_show_title') . '" value="0">' . __('No')  . '</label><br>';
+    echo '</div>';
+
     // Output
     echo '<div style="clear:both;">&nbsp;</div>';
     echo '<div style="text-align:right; float:left; width:130px;">' . __('Output:') . '</div>';
@@ -140,6 +158,39 @@ class RSSPhotoWidget extends WP_Widget
     echo '<label for="' . $this->get_field_name('rssphoto_output_slideshow')  . '"><input ' . (($output=='Slideshow')  ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_output_slideshow')  . '" name="' . $this->get_field_name('rssphoto_output') . '" value="Slideshow">'  . __('Slideshow')    . '</label><br>';
     echo '<label for="' . $this->get_field_name('rssphoto_output_static')     . '"><input ' . (($output=='Static')     ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_output_static')     . '" name="' . $this->get_field_name('rssphoto_output') . '" value="Static">'     . __('Static')       . '</label><br>';
     echo '</div>';
+
+    // Interval
+    echo '<div style="clear:both;">&nbsp;</div>';
+    echo '<div style="text-align:right; float:left; width:130px;"><label for="' . $this->get_field_name('rssphoto_interval') . '">' . __('Slideshow Time (ms):') . '</label></div>';
+    echo '<div style="text-align:left; float:left; width:350px; padding-left:5px;">';
+    echo '<input style="width: 350px;" id="' . $this->get_field_id('rssphoto_interval') . '" name="' . $this->get_field_name('rssphoto_interval') . '" type="text" value="' . $interval. '" />';
+    echo '</div>';
+
+    echo '<div style="clear:both;">&nbsp;</div>';
+    echo '<p>Enter values for thumbnail width and height (in pixels), or enter \'variable\' in only one of the spaces to maintain the aspect ratio of the original image given the other dimension.</p>';
+
+    /*--------------------------------------------------------------------*/
+
+    echo '<div style="float:left; width:260px;">';
+
+    // Height 
+    echo '<div style="text-align:right; float:left; width:130px;"><label for="' . $this->get_field_name('rssphoto_height') . '">' . __('Height (px)') . '</label></div>';
+    echo '<div style="text-align:left; float:left; width:110px; padding-left:5px;">';
+    echo '<input style="width:100px;" id="' . $this->get_field_id('rssphoto_height') . '" name="' . $this->get_field_name('rssphoto_height') . '" type="text" value="' . $height . '" />';
+    echo '</div>';
+
+    echo '</div>';
+    echo '<div style="float:left; width:240px;">';
+
+    // Width 
+    echo '<div style="text-align:right; float:left; width:130px;"><label for="' . $this->get_field_name('rssphoto_width') . '">' . __('Width (px)') . '</label></div>';
+    echo '<div style="text-align:left; float:left; width:70px; padding-left:5px;">';
+    echo '<input style="width:100px;" id="' . $this->get_field_id('rssphoto_width') . '" name="' . $this->get_field_name('rssphoto_width') . '" type="text" value="' . $width . '" />';
+    echo '</div>';
+
+    echo '</div>';
+
+    /*--------------------------------------------------------------------*/
 
     echo '<div style="clear:both;">&nbsp;</div>';
     echo '<h3>Feed Settings</h3>';
@@ -198,32 +249,13 @@ class RSSPhotoWidget extends WP_Widget
 
     /*--------------------------------------------------------------------*/
 
+    // Show Image Title
     echo '<div style="clear:both;">&nbsp;</div>';
-    echo '<h3>Image Settings</h3>';
-    echo '<p>Enter values for thumbnail width and height (in pixels), or enter \'variable\' in only one of the spaces to maintain the aspect ratio of the original image given the other dimension.</p>';
-
-    /*--------------------------------------------------------------------*/
-
-    echo '<div style="float:left; width:260px;">';
-
-    // Fixed Dimension
-    echo '<div style="text-align:right; float:left; width:130px;"><label for="' . $this->get_field_name('rssphoto_height') . '">' . __('Height (px)') . '</label></div>';
+    echo '<div style="text-align:right; float:left; width:130px;">' . __('Show Image Titles:') . '</div>';
     echo '<div style="text-align:left; float:left; width:110px; padding-left:5px;">';
-    echo '<input style="width:100px;" id="' . $this->get_field_id('rssphoto_height') . '" name="' . $this->get_field_name('rssphoto_height') . '" type="text" value="' . $height . '" />';
+    echo '<label for="' . $this->get_field_name('rssphoto_show_img_title_yes') . '"><input ' . (($show_img_title=='1') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_show_img_title_yes') . '" name="' . $this->get_field_name('rssphoto_show_img_title') . '" value="1">' . __('Yes') . '</label><br>';
+    echo '<label for="' . $this->get_field_name('rssphoto_show_img_title_no')  . '"><input ' . (($show_img_title=='0') ? 'checked' : '') . ' type="radio" id="' . $this->get_field_id('rssphoto_show_img_title_no')  . '" name="' . $this->get_field_name('rssphoto_show_img_title') . '" value="0">' . __('No')  . '</label><br>';
     echo '</div>';
-
-    echo '</div>';
-    echo '<div style="float:left; width:240px;">';
-
-    // Dimension Size (px)
-    echo '<div style="text-align:right; float:left; width:130px;"><label for="' . $this->get_field_name('rssphoto_width') . '">' . __('Width (px):') . '</label></div>';
-    echo '<div style="text-align:left; float:left; width:70px; padding-left:5px;">';
-    echo '<input style="width:100px;" id="' . $this->get_field_id('rssphoto_width') . '" name="' . $this->get_field_name('rssphoto_width') . '" type="text" value="' . $width . '" />';
-    echo '</div>';
-
-    echo '</div>';
-
-    /*--------------------------------------------------------------------*/
 
     // Bottom Spacing
     echo '<div style="clear:both;">&nbsp;</div>';

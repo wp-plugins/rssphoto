@@ -45,17 +45,18 @@ class RSSPhoto
    ****************************/
   var $title          = 'RSSPhoto'; // title shown above the widget
   var $url            = 'http://photography.spencerkellis.net/atom.php'; // url of feed to parse
-  var $width          = 150; // [W] in px or 'variable' (only one may have the value 'variable')
   var $height         = 120; // [H] in px or 'variable' (only one may have the value 'variable')
+  var $width          = 150; // [W] in px or 'variable' (only one may have the value 'variable')
   var $img_sel        = 'Most Recent'; // method of selecting images from feed items.  'Most Recent' or 'Random'
   var $num_img        = 1; // how many images to pull out per feed item
-  var $min_size       = 10; // minimum size of image (discarded if less)
-  var $max_size       = 500; // thumbnail will shrink to this hard limit in either dimension
   var $item_sel       = 'Random'; // method of selecting feed items.  'Most Recent' or 'Random'
   var $num_item       = 1; // number of feed items (i.e., articles) to pull out of the feed
-  var $show_title     = 1; // whether to show titles for each image
+  var $show_title     = 1; // whether to show RSSPhoto title
+  var $show_img_title = 1; // whether to show titles for each image
   var $output         = 'Slideshow2'; // output style: 'Slideshow2' or 'Slideshow' or 'Static'
   var $interval       = 6000; // interval in milliseconds between image transitions
+  var $min_size       = 10; // minimum size of image (discarded if less)
+  var $max_size       = 500; // thumbnail will shrink to this hard limit in either dimension
 
   /****************************
    * SimplePie settings
@@ -439,7 +440,7 @@ class RSSPhoto
         $active=1;
       }
       $html .= '">';
-      if($this->show_title && !empty($img['title']))
+      if($this->show_img_title && !empty($img['title']))
       {
         $html .= '<div class="title_overlay"><a href="'.$img['link'].'">'.$img['title'].'</a></div>';
       }
@@ -478,7 +479,7 @@ class RSSPhoto
         $active=1;
       }
       $html .= '">';
-      if($this->show_title && !empty($img['title']))
+      if($this->show_img_title && !empty($img['title']))
       {
         $html .= '<div class="title_overlay"><a href="'.$img['link'].'">'.$img['title'].'</a></div>';
       }
@@ -507,7 +508,7 @@ class RSSPhoto
     foreach($this->images as $img)
     {
       $html .= '<div>';
-      if($this->show_title && !empty($img['title']))
+      if($this->show_img_title && !empty($img['title']))
       {
         $html .= '<div class="rssphoto_item_title">'.$img['title'].'</div>';
       }
@@ -532,17 +533,20 @@ class RSSPhoto
    */
   function update($settings)
   {
-    if(!empty($settings['rssphoto_title']))      $this->title      = $settings['rssphoto_title'];
-    if(!empty($settings['rssphoto_url']))        $this->url        = $settings['rssphoto_url'];
-    if(!empty($settings['rssphoto_height']))     $this->height     = $settings['rssphoto_height'];
-    if(!empty($settings['rssphoto_width']))      $this->width      = $settings['rssphoto_width'];
-    if(!empty($settings['rssphoto_img_sel']))    $this->img_sel    = $settings['rssphoto_img_sel'];
-    if(!empty($settings['rssphoto_num_img']))    $this->num_img    = $settings['rssphoto_num_img'];
-    if(!empty($settings['rssphoto_item_sel']))   $this->item_sel   = $settings['rssphoto_item_sel'];
-    if(!empty($settings['rssphoto_num_item']))   $this->num_item   = $settings['rssphoto_num_item'];
-    if(!empty($settings['rssphoto_show_title'])) $this->show_title = $settings['rssphoto_show_title'];
-    if(!empty($settings['rssphoto_output']))     $this->output     = $settings['rssphoto_output'];
-    if(!empty($settings['rssphoto_interval']))   $this->interval   = $settings['rssphoto_interval'];
+    if(isset($settings['rssphoto_title']))          $this->title          = $settings['rssphoto_title'];
+    if(isset($settings['rssphoto_url']))            $this->url            = $settings['rssphoto_url'];
+    if(isset($settings['rssphoto_height']))         $this->height         = $settings['rssphoto_height'];
+    if(isset($settings['rssphoto_width']))          $this->width          = $settings['rssphoto_width'];
+    if(isset($settings['rssphoto_img_sel']))        $this->img_sel        = $settings['rssphoto_img_sel'];
+    if(isset($settings['rssphoto_num_img']))        $this->num_img        = $settings['rssphoto_num_img'];
+    if(isset($settings['rssphoto_item_sel']))       $this->item_sel       = $settings['rssphoto_item_sel'];
+    if(isset($settings['rssphoto_num_item']))       $this->num_item       = $settings['rssphoto_num_item'];
+    if(isset($settings['rssphoto_show_title']))     $this->show_title     = $settings['rssphoto_show_title'];
+    if(isset($settings['rssphoto_show_img_title'])) $this->show_img_title = $settings['rssphoto_show_img_title'];
+    if(isset($settings['rssphoto_output']))         $this->output         = $settings['rssphoto_output'];
+    if(isset($settings['rssphoto_interval']))       $this->interval       = $settings['rssphoto_interval'];
+    if(isset($settings['rssphoto_min_size']))       $this->min_size       = $settings['rssphoto_min_size'];
+    if(isset($settings['rssphoto_max_size']))       $this->max_size       = $settings['rssphoto_max_size'];
   }
 
   /**
@@ -645,6 +649,14 @@ class RSSPhoto
   /*********************************
    *  Publically exposed functions
    *********************************/
+
+  /**
+   *  Determine whether or not to show the Widget title
+   */
+  function show_title()
+  {
+    return ($this->show_title==1);
+  }
 
   /**
    *  Return the RSSPhoto title

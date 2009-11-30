@@ -40,26 +40,36 @@ class RSSPhotoShortcode
   {
     /* user-defined options */
     extract( shortcode_atts( array(
+      'title' => 'RSSPhoto',
       'url' => 'http://photography.spencerkellis.net/rss.php',
-      'fixed' => 'Height',
-      'size' => 120,
+      'height' => 120,
+      'width' => 150,
       'img_sel' => 'Random',
       'num_img' => 1,
       'item_sel' => 'Random',
       'num_item' => 10,
-      'show_title' => false,
-      'output' => 'Slideshow'
+      'show_title' => 1,
+      'show_img_title' => 1,
+      'output' => 'Slideshow2',
+      'interval' => 6000,
+      'min_size' => 10,
+      'max_size' => 500
     ), $atts ) );
 
-    $settings['rssphoto_url']        = $url;
-    $settings['rssphoto_fixed']      = $fixed;
-    $settings['rssphoto_size']       = $size;
-    $settings['rssphoto_img_sel']    = $img_sel;
-    $settings['rssphoto_num_img']    = $num_img;
-    $settings['rssphoto_item_sel']   = $item_sel;
-    $settings['rssphoto_num_item']   = $num_item;
-    $settings['rssphoto_show_title'] = $show_title;
-    $settings['rssphoto_output']     = $output;
+    $settings['rssphoto_title']          = $title;
+    $settings['rssphoto_url']            = $url;
+    $settings['rssphoto_height']         = $height;
+    $settings['rssphoto_width']          = $width;
+    $settings['rssphoto_img_sel']        = $img_sel;
+    $settings['rssphoto_num_img']        = $num_img;
+    $settings['rssphoto_item_sel']       = $item_sel;
+    $settings['rssphoto_num_item']       = $num_item;
+    $settings['rssphoto_show_title']     = $show_title;
+    $settings['rssphoto_show_img_title'] = $show_img_title;
+    $settings['rssphoto_output']         = $output;
+    $settings['rssphoto_interval']       = $interval;
+    $settings['rssphoto_min_size']       = $min_size;
+    $settings['rssphoto_max_size']       = $max_size;
 
     $this->rssphoto = new RSSPhoto($settings);
     $this->rssphoto->init();
