@@ -23,6 +23,7 @@ class RSSPhoto
    * Internal variables
    ****************************/
   var $version        = '0.8'; // current version of RSSPhoto
+  var $debug          = 0; // '0' for normal; '1' to print debug comments (hidden by default by <!-- and --> tags)
   var $images         = array(); // will store images to display
   var $error_msg      = ""; // most recent error message
   var $debug_msgs     = array(); // array of debug messages: see print_debug()
@@ -603,16 +604,31 @@ class RSSPhoto
   /**
    *  Print out the debug messages
    */
-  function print_debug()
+  function print_debug($hide=true)
   {
-    print "<ul>\n";
-    for($k=0; $k<count($this->debug_msgs); $k++)
+    if($hide)
     {
-      print "<li>";
-      print $this->debug_msgs[$k];
-      print "</li>\n";
+      print "<!--\n";
+      print "RSSPhoto v".$this->version." debug output START\n";
+      for($k=0; $k<count($this->debug_msgs); $k++)
+      {
+        print $this->debug_msgs[$k]."\n";
+      }
+      print "RSSPhoto v".$this->version." debug output END\n";
+      print "-->\n";
     }
-    print "</ul>\n";
+    else
+    {
+      print "<h2>RSSPhoto v".$this->version." debug output</h2>\n";
+      print "<ul>\n";
+      for($k=0; $k<count($this->debug_msgs); $k++)
+      {
+        print "<li>";
+        print $this->debug_msgs[$k];
+        print "</li>\n";
+      }
+      print "</ul>\n";
+    }
   }
 
   /*********************************
@@ -778,7 +794,9 @@ class RSSPhoto
     }
 
     $this->status = $this->check_thumbnails();
-    //$this->print_debug();
+
+    if($this->debug)
+      $this->print_debug();
   }
 
   /**
