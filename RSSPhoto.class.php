@@ -429,6 +429,7 @@ class RSSPhoto
   function slideshow2_html()
   {
     $html = '<div class="rssphoto_slideshow2" id="rssphoto-'.$this->id.'" style="height:'.$this->div_height.'px; width:'.$this->div_width.'px;">';
+    $html .= "\n";
 
     $active=0;
     foreach($this->images as $img)
@@ -448,6 +449,7 @@ class RSSPhoto
       $html .= '</div>';
       $html .= "\n";
     }
+    $html .= '<div class="clear"></div>';
     $html .= '</div>';
     $html .= "\n";
 
@@ -468,6 +470,7 @@ class RSSPhoto
   function slideshow_html()
   {
     $html = '<div class="rssphoto_slideshow" id="rssphoto-'.$this->id.'" style="height:'.$this->div_height.'px; width:'.$this->div_width.'px;">';
+    $html .= "\n";
 
     $active=0;
     foreach($this->images as $img)
@@ -487,6 +490,7 @@ class RSSPhoto
       $html .= '</div>';
       $html .= "\n";
     }
+    $html .= '<div class="clear"></div>';
     $html .= '</div>';
     $html .= "\n";
 

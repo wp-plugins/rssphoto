@@ -43,7 +43,6 @@
 {
   position: relative;
   margin:auto;
-  background-color:#000;
 }
 
 .rssphoto_slideshow2 div.item
@@ -72,10 +71,11 @@
   margin-top:0px;
   padding-top:5px;
   padding-bottom:4px;
-  filter:alpha(opacity=0); 
-  -moz-opacity:0.0; 
-  -khtml-opacity:0.0;
-  opacity:0.0;
+  display:none;
+  filter:alpha(opacity=70); 
+  -moz-opacity:0.7; 
+  -khtml-opacity:0.7;
+  opacity:0.7;
 }
 
 .rssphoto_slideshow2 div.item div.title_overlay a

@@ -4,7 +4,7 @@ Donation Link: http://blog.spencerkellis.net/projects/rssphoto
 Tags: RSS, Atom, photoblog, photo, photography, widget, jQuery, slideshow, multi-widget, shortcode
 Requires at least: 2.8
 Tested up to: 2.8.6
-Stable tag: 0.8
+Stable tag: 0.8.1
 
 A customizable plugin to display photos from an RSS or Atom feed as a widget or shortcode.
 
@@ -162,6 +162,11 @@ By default, the debug output is hidden in HTML comments (&lt;!-- and --&gt;), so
 
 
 == Changelog ==
+
+v0.8.1
+
+* Improved display of Slideshow v2 in IE; known issue with opacity but there are no black or white bars any more
+* Fixed a layout glitch to clear after the RSSPhoto div so elements below will align properly
 
 v0.8
 

@@ -52,7 +52,7 @@ function slideSwitch2(id)
  */
 function titleOverlayMouseEnter()
 {
-  jQuery("div.title_overlay").animate({opacity: 0.7}, 400, function(){});
+  jQuery("div.title_overlay").fadeIn();
 }
 
 /*
@@ -60,7 +60,7 @@ function titleOverlayMouseEnter()
  */
 function titleOverlayMouseLeave()
 {
-  jQuery("div.title_overlay").animate({opacity: 0.0}, 400, function(){});
+  jQuery("div.title_overlay").fadeOut();
 }
 
 /*
