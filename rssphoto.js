@@ -35,7 +35,7 @@ function slideSwitch2(id)
   if ( $active.length == 0 )
     $active = jQuery(".rssphoto_slideshow2#rssphoto-"+id+" div:last");
 
-  var $next = $active.next().length ? $active.next() : jQuery(".rssphoto_slideshow2#rssphoto-"+id+" div:first");
+  var $next = $active.next("div.item").length ? $active.next("div.item") : jQuery(".rssphoto_slideshow2#rssphoto-"+id+" div:first");
 
   $active.addClass('last-active')
     .animate({opacity : 0.0}, 1000);
@@ -72,7 +72,7 @@ function slideSwitch(id)
   if ( $active.length == 0 )
     $active = jQuery(".rssphoto_slideshow#rssphoto-"+id+" div:last");
 
-  var $next = $active.next().length ? $active.next() : jQuery(".rssphoto_slideshow#rssphoto-"+id+" div:first");
+  var $next = $active.next("div.item").length ? $active.next("div.item") : jQuery(".rssphoto_slideshow#rssphoto-"+id+" div:first");
 
   $active.addClass('last-active')
     .animate({opacity : 0.0}, 1000);

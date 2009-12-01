@@ -34,7 +34,23 @@ class RSSPhoto
   var $status         = 0; // -1 for error, 0 for uninitialized, 1 for initialized: see ready()
   var $div_height     = -1; // height of the RSSPhoto div, based on max thumbnail height encountered
   var $div_width      = -1; // height of the RSSPhoto div, based on max thumbnail height encountered
-  var $cache_dir      = 'wp-content/cache'; // assumed to exist in [WORDPRESS_DIR]/wp-content/
+  var $cache_dir      = 'wp-content/cache'; // always start this with wp-content; code below will determine what goes before wp-content
+
+  /*
+   * FOR ADVANCED USERS ONLY 
+   * If you're having problems with cache directory location, try modifying the values of these variables.  If you 
+   * change one, you must change the other.  Some examples of a $user_cache_dir:
+   * 
+   * $user_cache_dir = '/var/www/your.domain.com/wordpress/wp-content/cache'   // absolute path
+   * $user_cache_Dir = 'blog/wp-content/cache'  // relative path
+   *
+   * An example of a $user_thumb_url might be
+   *
+   * $user_thumb_url = 'http://your.domain.com/wordpress/wp-content/cache';
+   *
+   */
+  var $user_cache_dir = -1;
+  var $user_thumb_url = -1;
 
   /****************************
    * RSSPhoto temp vars
@@ -73,7 +89,7 @@ class RSSPhoto
   /**
    *  Chooser function to use either the SimplePie Core or built-in feed parser
    */
-  function init_feed($url='http://www.spencerkellis.net/atom.php',$parser='built-in',$cachedir='',$forcefeed=false)
+  function init_feed($url='http://www.spencerkellis.net/atom.php',$parser='built-in',$cachedir='',$usercachedir=-1,$forcefeed=false)
   {
     switch($parser)
     {
@@ -82,7 +98,10 @@ class RSSPhoto
         if(class_exists('SimplePie'))
         {
           $this->feed = new SimplePie();
-          $this->feed->set_cache_location(WP_CONTENT_DIR . "/" . $cachedir);
+          if($usercachedir!=-1)
+            $this->feed->set_cache_location($usercachedir);
+          else
+            $this->feed->set_cache_location(WP_CONTENT_DIR . "/" . $cachedir);
           $this->feed->set_feed_url($url);
           $this->feed->force_feed($forcefeed);
           $this->feed->init();
@@ -138,14 +157,41 @@ class RSSPhoto
       return false;
     }
 
+    // resolve path to the cache directory and check whether it exists
     $rel_wp_path = str_replace(get_bloginfo('url'),"",get_bloginfo('wpurl'));
-    $image_filename = "rssphoto-".md5($image_url)."-{$this->width}x{$this->height}.jpg";
-    $thumb_path = $rel_wp_path . "/" . $this->cache_dir . "/" . $image_filename;
-    $thumb_path = substr($thumb_path,1);
-    $thumb_url = get_bloginfo('wpurl')."/". $this->cache_dir ."/$image_filename";
     $this->add_debug("Relative wordpress path found to be $rel_wp_path");
-    $this->add_debug("Set thumbnail path to $thumb_path");
-    $this->add_debug("Set thumbnail URL to $thumb_url");
+    if($this->user_cache_dir==-1)
+    {
+      $cachedir = $rel_wp_path . "/" . $this->cache_dir;
+      $cachedir = substr($cachedir,1);
+      $this->add_debug("Automatically-resolved cache directory is $cachedir");
+    }
+    else
+    {
+      $cachedir = $this->user_cache_dir;
+      $this->add_debug("User-specified cache directory is $cachedir");
+    }
+    if(!file_exists(realpath($cachedir)))
+    {
+      $this->add_debug("[*] The resolved cache directory $cachedir does not exist according to file_exists() function in create_thumbnail(): returning false");
+      return false;
+    }
+
+    // construct path and URL to thumbnail
+    $image_filename = "rssphoto-".md5($image_url)."-{$this->width}x{$this->height}.jpg";
+    if($this->user_cache_dir==-1)
+    {
+      $thumb_path = $cachedir . "/" . $image_filename;
+      $thumb_url = get_bloginfo('wpurl')."/". $this->cache_dir ."/$image_filename";
+    }
+    else
+    {
+      $thumb_path = $cachedir ."/". $image_filename;
+      $thumb_url = $this->user_thumb_url ."/". $image_filename;
+      $this->add_debug("User-specified thumbnail URL is {$this->user_thumb_url}");
+    }
+    $this->add_debug("Final thumbnail path is $thumb_path");
+    $this->add_debug("Final thumbnail URL is $thumb_url");
 
     if(!file_exists($thumb_path))
     {
@@ -770,11 +816,13 @@ class RSSPhoto
     // we want to capture any errors
     $old_error_handler = set_error_handler(array($this, "RSSPhotoErrorHandler"),E_WARNING|E_USER_ERROR|E_USER_WARNING);
 
+    // set up pseudo-random ID for this instance of RSSPhoto
     $this->id = rand();
 
     // set up the SimplePie feed
-    $this->init_feed($this->url,$this->parser,$this->cache_dir,$this->force_feed);
+    $this->init_feed($this->url,$this->parser,$this->cache_dir,$this->user_cache_dir,$this->force_feed);
 
+    // error if feed wasn't set properly
     if(empty($this->feed))
     {
       $this->add_debug('[*] Dying in function init() because $this->feed is empty');
@@ -782,6 +830,7 @@ class RSSPhoto
       return;
     }
 
+    // error if feed wasn't set properly
     if(is_wp_error($this->feed))
     {
       $this->add_debug('[*] Dying in function init() because $this->feed is a Wordpress WP_Error object');
@@ -791,7 +840,6 @@ class RSSPhoto
     }
 
     // get images, generate thumbnails, etc.
-    // consider limiting this to some reasonable number for feeds that have >100s of items?
     if($this->feed->get_item_quantity() > 0)
     {
       $item_idxs = $this->select_indices($this->feed->get_items(),$this->item_sel,$this->num_item);
