@@ -31,9 +31,9 @@ class RSSPhotoShortcode
   {
     $this->setup($atts);
     if($this->rssphoto->ready())
-      echo $this->rssphoto->html();
+      return $this->rssphoto->html();
     else
-      echo $this->rssphoto->get_error();
+      return $this->rssphoto->get_error();
   }
 
   function setup($atts)
