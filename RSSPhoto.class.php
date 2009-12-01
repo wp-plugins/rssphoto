@@ -134,7 +134,7 @@ class RSSPhoto
   {
     if(!function_exists('imagecreatefromjpeg'))
     {
-      $this->add_debug('GD Library doesn\'t exist, so thumbnails won\'t be created: returning false from function create_thumbnail()');
+      $this->add_debug('[*] GD Library doesn\'t exist, so thumbnails won\'t be created: returning false from function create_thumbnail()');
       return false;
     }
 
@@ -149,9 +149,9 @@ class RSSPhoto
 
     if(!file_exists($thumb_path))
     {
-      if(!ini_get('allow_url_fopen'))
+      if(!ini_get('allow_url_fopen')) // save image locally and update $image_url
       {
-        // save image locally and update $image_url
+        $this->add_debug("URLs not allowed for getimagesize or GD: saving file to $thumb_path");
         $this->save_image($image_url,$thumb_path);
         $image_url=$thumb_path;
       }
@@ -159,7 +159,7 @@ class RSSPhoto
       $imginfo = @getimagesize($image_url);
       if(!$imginfo)
       {
-        $this->add_debug("Failed to open image at $image_url using getimagesize() in function create_thumbnail(): returning false");
+        $this->add_debug("[*] Failed to open image at $image_url using getimagesize() in function create_thumbnail(): returning false");
         return false;
       }
 
@@ -175,13 +175,13 @@ class RSSPhoto
 
       if($image==false)
       {
-        $this->add_debug("Failed to open image at $image_url with imagecreatefromXXX: returning false from function create_thumbnail()");
+        $this->add_debug("[*] Failed to open image at $image_url with imagecreatefromXXX: returning false from function create_thumbnail()");
         return false;
       }
 
       if($height<=$this->min_size || $width<=$this->min_size)
       {
-        $this->add_debug("Height or width are below the minimum size (which is ".$this->min_size."px): returning false from function create_thumbnail()");
+        $this->add_debug("[*] Height or width are below the minimum size (which is ".$this->min_size."px): returning false from function create_thumbnail()");
         return false;
       }
       
@@ -288,20 +288,20 @@ class RSSPhoto
           $result=@imagecopyresampled($thumb,$image,0,0,$crop_left,$crop_top,$thumb_width,$thumb_height,$crop_width,$crop_height);
           if(!$result)
           {
-            $this->add_debug("Call to function imagecopyresample failed");
+            $this->add_debug("[*] Call to function imagecopyresample failed");
             return false;
           }
           $result=@imagejpeg($thumb,$thumb_path,$quality);
           if(!$result)
           {
-            $this->add_debug("Call to imagejpeg([resource],$thumb_path,$quality) failed");
+            $this->add_debug("[*] Call to imagejpeg([resource],$thumb_path,$quality) failed");
             return false;
           }
         }
       } // if($height!=false && width!=false)
       else
       {
-        $this->add_debug("Height or width or both were false: {$height}x{$width}");
+        $this->add_debug("[*] Height or width or both were false: {$height}x{$width}");
       }
     } // if(!file_exists($thumb_path))
     else
@@ -309,7 +309,7 @@ class RSSPhoto
       $this->add_debug("Thumbnail has already been cached: $thumb_path");
     }
 
-    return $thumb_url;
+    return array($thumb_url,$thumb_path);
 
   } // function create_thumbnail
 
@@ -320,18 +320,23 @@ class RSSPhoto
   {
     for($k=count($this->images)-1; $k>=0; $k--)
     {
-      $imginfo=@getimagesize($this->images[$k]['url']);
+      if(!ini_get('allow_url_fopen')) // only attempt getimagesize on URL if allow_url_fopen is enabled
+        $uri = $this->images[$k]['path'];
+      else
+        $uri = $this->images[$k]['url'];
 
+      $imginfo=@getimagesize($uri);
+      
       if(!$imginfo)
       {
-        $this->add_debug("In check_thumbnails(), unsetting index $k of images ({$this->images[$k]['url']}) because getimagesize returned false");
+        $this->add_debug("[*] In check_thumbnails(), unsetting index $k of images ({$this->images[$k]['url']}) because getimagesize('url') returned false");
         unset($this->images[$k]);
       }
       else
       {
         if($imginfo[1] > $this->div_height)
           $this->div_height = $imginfo[1]+2;
-
+      
         if($imginfo[0] > $this->div_width)
           $this->div_width  = $imginfo[0]+2;
       }
@@ -349,7 +354,7 @@ class RSSPhoto
     }
     else
     {
-      $this->add_debug('In function check_thumbnails(), there are no images in $this->images; setting status to -1');
+      $this->add_debug('[*] In function check_thumbnails(), there are no images in $this->images; setting status to -1');
       return -1;
     }
   }
@@ -448,12 +453,13 @@ class RSSPhoto
   /**
    *  Add image to array
    */
-  function add_image($url=false,$link="",$desc="",$title="")
+  function add_image($url=false,$path="",$link="",$desc="",$title="")
   {
     if($url!=false)
     {
       $idx=count($this->images);
       $this->images[$idx]['url']=$url;
+      $this->images[$idx]['path']=$path;
       $this->images[$idx]['link']=$link;
       $this->images[$idx]['desc']=$desc;
       $this->images[$idx]['title']=$title;
@@ -692,7 +698,7 @@ class RSSPhoto
    */
   function RSSPhotoErrorHandler($errno, $errstr, $errfile, $errline)
   {
-    $this->add_debug("PHP ERROR [$errno] $errstr [in $errfile on line $errline]");
+    $this->add_debug("[*] PHP ERROR [$errno] $errstr [in $errfile on line $errline]");
 
     // don't execute PHP Error Handler
     return true;
@@ -771,14 +777,14 @@ class RSSPhoto
 
     if(empty($this->feed))
     {
-      $this->add_debug('Dying in function init() because $this->feed is empty');
+      $this->add_debug('[*] Dying in function init() because $this->feed is empty');
       $this->ignominious_death();
       return;
     }
 
     if(is_wp_error($this->feed))
     {
-      $this->add_debug('Dying in function init() because $this->feed is a Wordpress WP_Error object');
+      $this->add_debug('[*] Dying in function init() because $this->feed is a Wordpress WP_Error object');
       $this->set_error($this->feed->get_error_message());
       $this->ignominious_death();
       return;
@@ -840,19 +846,19 @@ class RSSPhoto
             foreach($image_url as $url)
             {
               $this->add_debug("Evaluating $url");
-              $thumb_url = $this->create_thumbnail($url);
+              list($thumb_url,$thumb_path) = $this->create_thumbnail($url);
               if($thumb_url!=false)
               {
                 $this->add_debug("Adding locally stored file $thumb_url");
-                $this->add_image($thumb_url,$item->get_link(0),$item->get_description(),$item->get_title());
+                $this->add_image($thumb_url,$thumb_path,$item->get_link(0),$item->get_description(),$item->get_title());
               }
               else
-                $this->add_debug("Failed to add image at $url because create_thumbnail() returned false");
+                $this->add_debug("[*] Failed to add image at $url because create_thumbnail() returned false");
             }
           }
           else
           {
-            $this->add_debug('Dying in function init() because $image_url is not an array');
+            $this->add_debug('[*] Dying in function init() because $image_url is not an array');
             $this->set_error('Bad image urls');
             $this->ignominious_death();
             return;
@@ -865,7 +871,7 @@ class RSSPhoto
           else
             $this->set_error("Tried to load item #$item_idx from $url and couldn't!");
 
-          $this->add_debug('Died in function init() because a feed item was false');
+          $this->add_debug('[*] Died in function init() because a feed item was false');
           $this->ignominious_death();
           return;
         }
