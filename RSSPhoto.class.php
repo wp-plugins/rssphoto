@@ -827,6 +827,8 @@ class RSSPhoto
     {
       $this->add_debug('[*] Dying in function init() because $this->feed is empty');
       $this->ignominious_death();
+      if($this->debug)
+        $this->print_debug();
       return;
     }
 
@@ -836,6 +838,8 @@ class RSSPhoto
       $this->add_debug('[*] Dying in function init() because $this->feed is a Wordpress WP_Error object');
       $this->set_error($this->feed->get_error_message());
       $this->ignominious_death();
+      if($this->debug)
+        $this->print_debug();
       return;
     }
 
@@ -906,10 +910,8 @@ class RSSPhoto
           }
           else
           {
-            $this->add_debug('[*] Dying in function init() because $image_url is not an array');
-            $this->set_error('Bad image urls');
-            $this->ignominious_death();
-            return;
+            $this->add_debug("[*] In function init(), get_image_urls returned '$image_url' which is not an array; skipping");
+            next;
           }
         }
         else // item==false
@@ -917,13 +919,20 @@ class RSSPhoto
           if($this->feed->error())
             $this->set_error($this->feed->error());
           else
-            $this->set_error("Tried to load item #$item_idx from $url and couldn't!");
+            $this->set_error("Tried to load item #$item_idx from {$this->url} and couldn't!");
 
-          $this->add_debug('[*] Died in function init() because a feed item was false');
-          $this->ignominious_death();
-          return;
+          $this->add_debug("[*] In function init(), feed item $item_idx was false");
+          next;
         }
       }
+    }
+    else // feed->get_item_quantity() == 0
+    {
+      $this->set_error("There were no items found in the feed at {$this->url}");
+      $this->ignominious_death();
+      if($this->debug)
+        $this->print_debug();
+      return;
     }
 
     $this->status = $this->check_thumbnails();
