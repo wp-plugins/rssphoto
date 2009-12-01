@@ -21,9 +21,9 @@
 function setupSlideshow2(id,interval)
 {
   setInterval( "slideSwitch2("+id+")", interval );
-  jQuery("div.rssphoto_slideshow2")
-    .mouseenter(titleOverlayMouseEnter)
-    .mouseleave(titleOverlayMouseLeave);
+  jQuery("div.rssphoto_slideshow2#rssphoto-"+id)
+    .bind('mouseenter',{'id':id},titleOverlayMouseEnter)
+    .bind('mouseleave',{'id':id},titleOverlayMouseLeave);
 }
 
 /*
@@ -50,17 +50,17 @@ function slideSwitch2(id)
 /*
  * Mouseenter code for Slideshow2 and show title
  */
-function titleOverlayMouseEnter()
+function titleOverlayMouseEnter(e)
 {
-  jQuery("div.title_overlay").fadeIn();
+  jQuery(".rssphoto_slideshow2#rssphoto-"+e.data.id+" div.title_overlay").fadeIn();
 }
 
 /*
  * Mouseleave code for Slideshow2 and show title
  */
-function titleOverlayMouseLeave()
+function titleOverlayMouseLeave(e)
 {
-  jQuery("div.title_overlay").fadeOut();
+  jQuery(".rssphoto_slideshow2#rssphoto-"+e.data.id+" div.title_overlay").fadeOut();
 }
 
 /*
