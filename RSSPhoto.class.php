@@ -17,6 +17,14 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/*
+ *  TO DO LIST
+ *
+ *  1. Allow empty fields for width or height to mean "variable"
+ *  2. Make shortcode attributes not have any spaces, e.g., "Most Recent" should be "MostRecent"
+ *  3. Make a "quiet mode" where no errors or debug is output in case something goes wrong on a live site
+ */
+
 class RSSPhoto
 {
   /****************************
@@ -107,7 +115,7 @@ class RSSPhoto
           $this->feed->init();
         }
         else
-          $this->set_error('SimplePie class does not exist but was selected to parse feeds');
+          $this->add_debug('[*] SimplePie class does not exist but was selected to parse feeds');
         break;
       case 'built-in':
       default:
@@ -117,7 +125,7 @@ class RSSPhoto
           $this->feed = fetch_feed($url);
         }
         else
-          $this->set_error('The built-in Wordpress fetch_feed() function does not exist: upgrade to WP 2.8 or later');
+          $this->add_debug('[*] The built-in Wordpress fetch_feed() function does not exist: upgrade to WP 2.8 or later');
         break;
     }
   }
@@ -538,7 +546,7 @@ class RSSPhoto
       $html .= '</div>';
       $html .= "\n";
     }
-    $html .= '<div class="clear"></div>';
+    $html .= '<div class="rssphoto_clear"></div>';
     $html .= '</div>';
     $html .= "\n";
 
@@ -579,7 +587,7 @@ class RSSPhoto
       $html .= '</div>';
       $html .= "\n";
     }
-    $html .= '<div class="clear"></div>';
+    $html .= '<div class="rssphoto_clear"></div>';
     $html .= '</div>';
     $html .= "\n";
 
@@ -683,20 +691,12 @@ class RSSPhoto
   }
 
   /**
-   *  Establish an error message
-   */
-  function set_error($str)
-  {
-    $this->error_msg=$str;
-  }
-
-  /**
    *  Simple error handler 
    */
   function ignominious_death()
   {
     if(empty($this->error_msg))
-      $this->set_error('RSSPhoto died an unknown but ignominious death');
+      $this->add_debug('RSSPhoto died an ignominious death');
 
     $this->status = -1;
   }
@@ -804,7 +804,7 @@ class RSSPhoto
    */
   function get_error()
   {
-    return $this->error_msg;
+    return $this->debug_msgs[count($this->debug_msgs)-1];
   }
 
   /**
@@ -836,7 +836,7 @@ class RSSPhoto
     if(is_wp_error($this->feed))
     {
       $this->add_debug('[*] Dying in function init() because $this->feed is a Wordpress WP_Error object');
-      $this->set_error($this->feed->get_error_message());
+      $this->add_debug("[*]".$this->feed->get_error_message());
       $this->ignominious_death();
       if($this->debug)
         $this->print_debug();
@@ -917,19 +917,17 @@ class RSSPhoto
         else // item==false
         {
           if($this->feed->error())
-            $this->set_error($this->feed->error());
+            $this->add_debug($this->feed->error());
           else
-            $this->set_error("Tried to load item #$item_idx from {$this->url} and couldn't!");
+            $this->add_debug("Tried to load item #$item_idx from {$this->url} and couldn't!");
 
-          $this->add_debug("[*] In function init(), feed item $item_idx was false");
           next;
         }
       }
     }
     else // feed->get_item_quantity() == 0
     {
-      $this->set_error("There were no items found in the feed at {$this->url}");
-      $this->ignominious_death();
+      $this->add_debug("There were no items found in the feed at {$this->url} (feed->get_item_quantity()=".$feed->get_item_quantity());
       if($this->debug)
         $this->print_debug();
       return;

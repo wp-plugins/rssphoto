@@ -201,7 +201,7 @@
   text-decoration: none;
 }
 
-.clear
+.rssphoto_clear
 {
   clear:both;
   line-height:0px;
@@ -209,7 +209,7 @@
   font-size:1px;
 }
 
-.clear:after
+.rssphoto_clear:after
 {
   content: " ";
 }
