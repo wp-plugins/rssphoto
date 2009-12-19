@@ -23,6 +23,7 @@
  *  1. Allow empty fields for width or height to mean "variable"
  *  2. Make shortcode attributes not have any spaces, e.g., "Most Recent" should be "MostRecent"
  *  3. Make a "quiet mode" where no errors or debug is output in case something goes wrong on a live site
+ *  4. Fix layout issues with variable height and Hamad's feed
  */
 
 class RSSPhoto
